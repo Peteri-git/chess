@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option csharp_namespace = "GrpcGameService";
+
+package Greet;
+
+// The greeting service definition.
+service Room {
+  // Sends a greeting
+  rpc List (RoomListRequest) returns (RoomListResponse);
+  rpc Create (RoomCreateRequest) returns (RoomCreateResponse);
+  rpc Join (JoinRoomRequest) returns (JoinRoomResponse);
+}
+service Chess{
+	rpc Start (GameStartRequest) returns (stream GameMoveResponse);
+	rpc Move (GameMoveRequest) returns (GameMoveResponse);
+}
+
+message Room{
+	int32 RoomId =1;
+	string Name =2;
+}
