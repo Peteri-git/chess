@@ -18,9 +18,6 @@
     <ClCompile Include="GTKwindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="helloworld.cpp">
-      <Filter>Resource Files</Filter>
-    </ClCompile>
     <ClCompile Include="RoomWindow.cpp">
       <Filter>Resource Files</Filter>
     </ClCompile>
@@ -35,9 +32,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="helloworld.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="RoomWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>

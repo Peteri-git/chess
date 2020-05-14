@@ -101,13 +101,5 @@ void RoomWindow::join_button_clicked() {
 			game->show();
 			break;
 		}
-		if (cmd.has_end())
-		{
-
-		}
-		if (cmd.has_move())
-		{
-
-		}
 	}
 }
