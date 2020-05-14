@@ -2,7 +2,7 @@
 #include <iostream>
 #include <iostream>
 #include <grpc/grpc.h>
-#include "helloworld.h"
+#include "GameWindow.h"
 #include <gtkmm/application.h>
 #include <grpcpp/channel.h>
 #include <grpcpp/client_context.h>
@@ -95,8 +95,10 @@ void RoomWindow::join_button_clicked() {
 	{
 		if (cmd.has_start())
 		{
-			HelloWorld* h = new HelloWorld();
-			h->show();
+			auto board =cmd.start().state().tiles();
+			GameWindow* game = new GameWindow;
+			game->board = board;
+			game->show();
 			break;
 		}
 		if (cmd.has_end())
