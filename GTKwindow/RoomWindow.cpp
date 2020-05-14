@@ -2,6 +2,8 @@
 #include <iostream>
 #include <iostream>
 #include <grpc/grpc.h>
+#include "helloworld.h"
+#include <gtkmm/application.h>
 #include <grpcpp/channel.h>
 #include <grpcpp/client_context.h>
 #include <grpcpp/create_channel.h>
@@ -39,7 +41,7 @@ RoomWindow::RoomWindow() : comboB(),join_button("Join Room!"),add_button("Add Ro
 		for (auto item : resp.rooms()) {
 			int first = item.roomid();
 			Room second = item;
-			room_dic.insert(pair<int,Room*>(first, &second));
+			room_dic.insert(pair<int, string > (first, item.name().c_str()));
 			comboB.append(item.name().c_str());
 		}
 	}
@@ -77,24 +79,33 @@ void RoomWindow::join_button_clicked() {
 	RoomJoinRequest req;
 	for (auto const& x : room_dic)
 	{
-		int tmp = comboB.get_active_row_number();
-		if (tmp == x.first)
+		string tmp = comboB.get_active_text().c_str();
+		if (tmp == x.second)
 		{
-			req.set_allocated_room(x.second);
+			Room* join = new Room();
+			join->set_name(x.second);
+			join->set_roomid(x.first);
+			req.set_allocated_room(join);
 		}
 	}
 	auto test = req.has_room();
 	auto status = client->Join(&ctx, req);
-	while (true)
+	GameCommandResponse cmd;
+	while (status->Read(&cmd))
 	{
-		GameCommandResponse cmd;
-		while(status->Read(&cmd))
+		if (cmd.has_start())
 		{
-			if (cmd.has_start())
-			{
+			HelloWorld* h = new HelloWorld();
+			h->show();
+			break;
+		}
+		if (cmd.has_end())
+		{
 
-			}
+		}
+		if (cmd.has_move())
+		{
+
 		}
 	}
-
 }

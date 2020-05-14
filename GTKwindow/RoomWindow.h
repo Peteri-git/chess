@@ -29,5 +29,5 @@ protected:
 	Button add_button;
 	Entry textbox;
 	shared_ptr<GrpcGameService::RoomService::Stub> client;
-	std::map<int, GrpcGameService::Room*> room_dic;
+	std::map<int, string> room_dic;
 };
