@@ -95,10 +95,15 @@ void RoomWindow::join_button_clicked() {
 	{
 		if (cmd.has_start())
 		{
-			auto board =cmd.start().state().tiles();
-			GameWindow* game = new GameWindow;
-			game->board = board;
+			auto board =cmd.start().state().tiles();	
+			GameWindow* game = new GameWindow();
 			game->show();
+			for (auto const& item : board) {
+				boardTile fgt;
+				fgt.color = item.figurinecolor();
+				fgt.figurine = item.figurine();
+				game->board[item.position().row()][item.position().column()] = fgt;
+			}
 			break;
 		}
 	}

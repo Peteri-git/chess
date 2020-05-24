@@ -164,6 +164,7 @@
     <ClCompile Include="RoomWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="boardTile.h" />
     <ClInclude Include="GameWindow.h" />
     <ClInclude Include="grpc\GameService.grpc.pb.h" />
     <ClInclude Include="grpc\GameService.pb.h" />
