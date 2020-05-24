@@ -77,6 +77,7 @@ void RoomWindow::add_button_clicked(){
 void RoomWindow::join_button_clicked() {
 	ClientContext ctx;
 	RoomJoinRequest req;
+	int roomid;
 	for (auto const& x : room_dic)
 	{
 		string tmp = comboB.get_active_text().c_str();
@@ -85,11 +86,11 @@ void RoomWindow::join_button_clicked() {
 			Room* join = new Room();
 			join->set_name(x.second);
 			join->set_roomid(x.first);
+			roomid = x.first;
 			req.set_allocated_room(join);
 		}
 	}
-	auto test = req.has_room();
-	auto status = client->Join(&ctx, req);
+	std::shared_ptr<grpc::ClientReader<GrpcGameService::GameCommandResponse>> status = client->Join(&ctx, req);
 	GameCommandResponse cmd;
 	while (status->Read(&cmd))
 	{
@@ -97,12 +98,25 @@ void RoomWindow::join_button_clicked() {
 		{
 			auto board =cmd.start().state().tiles();	
 			GameWindow* game = new GameWindow();
+			game->client = client;
+			game->status = status;
+			game->roomid = roomid;
 			game->show();
 			for (auto const& item : board) {
 				boardTile fgt;
-				fgt.color = item.figurinecolor();
-				fgt.figurine = item.figurine();
+				fgt.color = GrpcGameService::Color_Name(item.figurinecolor());
+				fgt.figurine = GrpcGameService::Figurine_Name(item.figurine());
 				game->board[item.position().row()][item.position().column()] = fgt;
+			}
+			for (int i = 2; i < 6; i++)
+			{
+				for (int j = 0; j < 8; j++)
+				{
+					boardTile fgt;
+					fgt.color = "None";
+					fgt.figurine = "None";
+					game->board[i][j] = fgt;
+				}
 			}
 			break;
 		}

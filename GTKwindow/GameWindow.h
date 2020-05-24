@@ -23,13 +23,16 @@ public:
 	GameWindow();
 	virtual ~GameWindow();
 	boardTile board[8][8];
+	std::shared_ptr<grpc::ClientReader<GrpcGameService::GameCommandResponse>> status;
+	std::shared_ptr<GrpcGameService::RoomService::Stub> client;
+	int roomid;
 protected:
 	void ShowBoard();
-	void ShowMoves(std::string figurine, std::string color);
-	void on_button_clicked(Glib::ustring data);
+	void SendMoves(int oldX, int oldY, int newX, int newY);
+	void ShowMoves(std::string figurine, std::string color,int x, int y);
 
 	Gtk::Grid gridBox;
-	Gtk::Button m_button1, m_button2, m_button3;
+	Gtk::Button start_button;
 	Gtk::Image king;
 };
 
