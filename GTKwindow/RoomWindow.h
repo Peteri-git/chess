@@ -5,7 +5,9 @@
 #include <gtkmm/listbox.h>
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/entry.h>
+#include <thread>
 #include <grpc/grpc.h>
+#include "GameWindow.h"
 #include <grpcpp/channel.h>
 #include <grpcpp/client_context.h>
 #include <grpcpp/create_channel.h>
@@ -22,7 +24,9 @@ public:
 	virtual ~RoomWindow();
 protected:
 	void add_button_clicked();
+	GameWindow* game = new GameWindow();
 	void join_button_clicked();
+	void listen(std::shared_ptr<grpc::ClientReader<GrpcGameService::GameCommandResponse>> status,GrpcGameService::GameCommandResponse cmd);
 	Box m_box;
 	ComboBoxText comboB;
 	Button join_button;

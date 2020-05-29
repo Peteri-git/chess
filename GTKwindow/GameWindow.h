@@ -23,9 +23,10 @@ public:
 	GameWindow();
 	virtual ~GameWindow();
 	boardTile board[8][8];
+	std::string color;
 	std::shared_ptr<grpc::ClientReader<GrpcGameService::GameCommandResponse>> status;
 	std::shared_ptr<GrpcGameService::RoomService::Stub> client;
-	int roomid;
+	std::basic_string<char, std::char_traits<char>, std::allocator<char>> gameid;
 protected:
 	void ShowBoard();
 	void SendMoves(int oldX, int oldY, int newX, int newY);

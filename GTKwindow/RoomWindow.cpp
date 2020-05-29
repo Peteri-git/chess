@@ -1,8 +1,7 @@
 #include "RoomWindow.h"
 #include <iostream>
-#include <iostream>
+#include <future>
 #include <grpc/grpc.h>
-#include "GameWindow.h"
 #include <gtkmm/application.h>
 #include <grpcpp/channel.h>
 #include <grpcpp/client_context.h>
@@ -61,6 +60,44 @@ RoomWindow::RoomWindow() : comboB(),join_button("Join Room!"),add_button("Add Ro
 RoomWindow::~RoomWindow() {
 
 }
+void RoomWindow::listen(std::shared_ptr<grpc::ClientReader<GrpcGameService::GameCommandResponse>> status, GameCommandResponse cmd) {
+	while (status->Read(&cmd))
+	{
+		if (cmd.has_start())
+		{
+			auto color = cmd.start().color();
+			auto board = cmd.start().state().tiles();
+			auto gameid = cmd.start().gameid();
+
+
+			game->client = client;
+			game->status = status;
+			game->gameid = gameid;
+			game->color = GrpcGameService::Color_Name(color);
+
+			for (auto const& item : board) {
+				boardTile fgt;
+				fgt.color = GrpcGameService::Color_Name(item.figurinecolor());
+				fgt.figurine = GrpcGameService::Figurine_Name(item.figurine());
+				game->board[item.position().row()][item.position().column()] = fgt;
+			}
+			for (int i = 2; i < 6; i++)
+			{
+				for (int j = 0; j < 8; j++)
+				{
+					boardTile fgt;
+					fgt.color = "NONE";
+					fgt.figurine = "None";
+					game->board[i][j] = fgt;
+				}
+			}
+		}
+		if (cmd.has_move())
+		{
+
+		}
+	}
+}
 void RoomWindow::add_button_clicked(){
 	ClientContext ctx;
 	RoomCreateRequest req;
@@ -77,7 +114,6 @@ void RoomWindow::add_button_clicked(){
 void RoomWindow::join_button_clicked() {
 	ClientContext ctx;
 	RoomJoinRequest req;
-	int roomid;
 	for (auto const& x : room_dic)
 	{
 		string tmp = comboB.get_active_text().c_str();
@@ -86,39 +122,14 @@ void RoomWindow::join_button_clicked() {
 			Room* join = new Room();
 			join->set_name(x.second);
 			join->set_roomid(x.first);
-			roomid = x.first;
 			req.set_allocated_room(join);
 		}
 	}
 	std::shared_ptr<grpc::ClientReader<GrpcGameService::GameCommandResponse>> status = client->Join(&ctx, req);
 	GameCommandResponse cmd;
-	while (status->Read(&cmd))
-	{
-		if (cmd.has_start())
-		{
-			auto board =cmd.start().state().tiles();	
-			GameWindow* game = new GameWindow();
-			game->client = client;
-			game->status = status;
-			game->roomid = roomid;
-			game->show();
-			for (auto const& item : board) {
-				boardTile fgt;
-				fgt.color = GrpcGameService::Color_Name(item.figurinecolor());
-				fgt.figurine = GrpcGameService::Figurine_Name(item.figurine());
-				game->board[item.position().row()][item.position().column()] = fgt;
-			}
-			for (int i = 2; i < 6; i++)
-			{
-				for (int j = 0; j < 8; j++)
-				{
-					boardTile fgt;
-					fgt.color = "None";
-					fgt.figurine = "None";
-					game->board[i][j] = fgt;
-				}
-			}
-			break;
-		}
-	}
+	//std::future<void> t1(std::async(&RoomWindow::listen,this, status, cmd));
+	//std::future<void> t2(std::async(&GameWindow::show,game));
+	std::thread t1(&RoomWindow::listen, this, status, cmd);
+	t1.detach();
+	game->show();
 }
