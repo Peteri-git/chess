@@ -41,6 +41,8 @@ RoomWindow::RoomWindow() : comboB(),join_button("Join Room!"),add_button("Add Ro
 			int first = item.roomid();
 			Room second = item;
 			room_dic.insert(pair<int, string > (first, item.name().c_str()));
+			string tmp = item.name().c_str();
+			auto count = item.playercount();
 			comboB.append(item.name().c_str());
 		}
 	}
@@ -60,7 +62,22 @@ RoomWindow::RoomWindow() : comboB(),join_button("Join Room!"),add_button("Add Ro
 RoomWindow::~RoomWindow() {
 
 }
-void RoomWindow::listen(std::shared_ptr<grpc::ClientReader<GrpcGameService::GameCommandResponse>> status, GameCommandResponse cmd) {
+void RoomWindow::listen() {
+	ClientContext ctx;
+	RoomJoinRequest req;
+	for (auto const& x : room_dic)
+	{
+		string tmp = comboB.get_active_text().c_str();
+		if (tmp == x.second)
+		{
+			Room* join = new Room();
+			join->set_name(x.second);
+			join->set_roomid(x.first);
+			req.set_allocated_room(join);
+		}
+	}
+	std::shared_ptr<grpc::ClientReader<GrpcGameService::GameCommandResponse>> status = client->Join(&ctx, req);
+	GameCommandResponse cmd;
 	while (status->Read(&cmd))
 	{
 		if (cmd.has_start())
@@ -94,7 +111,8 @@ void RoomWindow::listen(std::shared_ptr<grpc::ClientReader<GrpcGameService::Game
 		}
 		if (cmd.has_move())
 		{
-
+			auto move = cmd.move();
+			game->UpdateMoves(move);
 		}
 	}
 }
@@ -112,24 +130,7 @@ void RoomWindow::add_button_clicked(){
 	}
 }
 void RoomWindow::join_button_clicked() {
-	ClientContext ctx;
-	RoomJoinRequest req;
-	for (auto const& x : room_dic)
-	{
-		string tmp = comboB.get_active_text().c_str();
-		if (tmp == x.second)
-		{
-			Room* join = new Room();
-			join->set_name(x.second);
-			join->set_roomid(x.first);
-			req.set_allocated_room(join);
-		}
-	}
-	std::shared_ptr<grpc::ClientReader<GrpcGameService::GameCommandResponse>> status = client->Join(&ctx, req);
-	GameCommandResponse cmd;
-	//std::future<void> t1(std::async(&RoomWindow::listen,this, status, cmd));
-	//std::future<void> t2(std::async(&GameWindow::show,game));
-	std::thread t1(&RoomWindow::listen, this, status, cmd);
+	std::thread t1(&RoomWindow::listen, this);
 	t1.detach();
 	game->show();
 }

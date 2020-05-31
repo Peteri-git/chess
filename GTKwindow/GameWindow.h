@@ -27,6 +27,7 @@ public:
 	std::shared_ptr<grpc::ClientReader<GrpcGameService::GameCommandResponse>> status;
 	std::shared_ptr<GrpcGameService::RoomService::Stub> client;
 	std::basic_string<char, std::char_traits<char>, std::allocator<char>> gameid;
+	void UpdateMoves(GrpcGameService::GameMove move);
 protected:
 	void ShowBoard();
 	void SendMoves(int oldX, int oldY, int newX, int newY);

@@ -26,7 +26,7 @@ protected:
 	void add_button_clicked();
 	GameWindow* game = new GameWindow();
 	void join_button_clicked();
-	void listen(std::shared_ptr<grpc::ClientReader<GrpcGameService::GameCommandResponse>> status,GrpcGameService::GameCommandResponse cmd);
+	void listen();
 	Box m_box;
 	ComboBoxText comboB;
 	Button join_button;
