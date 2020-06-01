@@ -105,6 +105,7 @@ void RoomWindow::listen() {
 					boardTile fgt;
 					fgt.color = "NONE";
 					fgt.figurine = "None";
+					fgt.hasFunc = false;
 					game->board[i][j] = fgt;
 				}
 			}

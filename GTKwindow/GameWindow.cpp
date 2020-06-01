@@ -24,6 +24,7 @@ void GameWindow::UpdateMoves(GameMove move)
 }
 void GameWindow::SendMoves(int oldX,int oldY,int newX,int newY) 
 {
+	
 	//board[oldX][oldY].hasFunc = true;
 	Glib::RefPtr<Gtk::CssProvider> css_white = Gtk::CssProvider::create();
 	css_white->load_from_data("button {background-image: image(gray);}");
@@ -59,6 +60,13 @@ void GameWindow::SendMoves(int oldX,int oldY,int newX,int newY)
 				gridBox.attach(*tile, j, i, 1, 1);
 
 				board[i][j].hasFunc = false;
+			}
+			if (i == oldX && j == oldY)
+			{
+				Button* tile = new Button();
+				gridBox.remove(*board[i][j].button);
+				board[i][j].button = tile;
+				gridBox.attach(*tile, j, i, 1, 1);
 			}
 		}
 	}
@@ -847,7 +855,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 				board[x + 2][y - 1].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 2, y - 1));
 				board[x + 2][y - 1].hasFunc = true;
 			}
-			if (x + 2 < 8 && y + 1 >= 0 && board[x + 2][y - 1].color != "BLACK")
+			if (x + 2 < 8 && y + 1 >= 0 && board[x + 2][y + 1].color != "BLACK")
 			{
 				board[x + 2][y + 1].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
 				board[x + 2][y + 1].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 2, y + 1));
