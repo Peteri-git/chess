@@ -31,9 +31,10 @@ public:
 protected:
 	void ShowBoard();
 	void EmptyFunction();
+	void Turn();
 	void SendMoves(int oldX, int oldY, int newX, int newY);
 	void ShowMoves(std::string figurine, std::string color,int x, int y);
-
+	int turn = 0;
 	Gtk::Grid gridBox;
 	Gtk::Button start_button;
 	Gtk::Image king;

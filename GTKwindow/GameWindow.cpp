@@ -9,7 +9,8 @@ using namespace Gtk;
 GameWindow::GameWindow() :start_button("show board")
 {
 	set_title("Chess");
-	set_border_width(10);
+	set_resizable(false);
+	set_border_width(1);
 	add(gridBox);
 	start_button.signal_clicked().connect(sigc::mem_fun(*this, &GameWindow::ShowBoard));
 	gridBox.attach(start_button, 0, 1, 1, 1);
@@ -22,10 +23,98 @@ void GameWindow::UpdateMoves(GameMove move)
 {
 	set_title("it did something");
 }
+void GameWindow::Turn()
+{
+	if (turn == 0)
+	{
+		for (int i = 0; i < 8; i++)
+		{
+			for (int j = 0; j < 8; j++)
+			{
+				if (board[i][j].color == "WHITE")
+				{
+					Button* tile = new Button();
+					string path = "D:\\GTKwindow\\Debug\\";
+					string fig = board[i][j].figurine;
+					string color = board[i][j].color;
+					path.append(color);
+					path.append("_");
+					path.append(fig);
+					path.append(".png");
+					Image* figurine = new Image(path);
+					tile->set_image(*figurine);
+					gridBox.remove(*board[i][j].button);
+					board[i][j].button = tile;
+					gridBox.attach(*tile, j, i, 1, 1);
+				}
+				if (board[i][j].color == "BLACK")
+				{
+					Button* tile = new Button();
+					string path = "D:\\GTKwindow\\Debug\\";
+					string fig = board[i][j].figurine;
+					string color = board[i][j].color;
+					path.append(color);
+					path.append("_");
+					path.append(fig);
+					path.append(".png");
+					Image* figurine = new Image(path);
+					tile->set_image(*figurine);
+					tile->signal_clicked().connect(sigc::bind<string, string, int, int>(sigc::mem_fun(*this, &GameWindow::ShowMoves), fig, color, i, j));
+					gridBox.remove(*board[i][j].button);
+					board[i][j].button = tile;
+					gridBox.attach(*tile, j, i, 1, 1);
+				}
+			}
+		}
+		turn = 1;
+	}
+	else if (turn == 1)
+	{
+		for (int i = 0; i < 8; i++)
+		{
+			for (int j = 0; j < 8; j++)
+			{
+				if (board[i][j].color == "WHITE")
+				{
+					Button* tile = new Button();
+					string path = "D:\\GTKwindow\\Debug\\";
+					string fig = board[i][j].figurine;
+					string color = board[i][j].color;
+					path.append(color);
+					path.append("_");
+					path.append(fig);
+					path.append(".png");
+					Image* figurine = new Image(path);
+					tile->set_image(*figurine);
+					gridBox.remove(*board[i][j].button);
+					board[i][j].button = tile;
+					tile->signal_clicked().connect(sigc::bind<string, string, int, int>(sigc::mem_fun(*this, &GameWindow::ShowMoves), fig, color, i, j));
+					gridBox.attach(*tile, j, i, 1, 1);
+				}
+				if (board[i][j].color == "BLACK")
+				{
+					Button* tile = new Button();
+					string path = "D:\\GTKwindow\\Debug\\";
+					string fig = board[i][j].figurine;
+					string color = board[i][j].color;
+					path.append(color);
+					path.append("_");
+					path.append(fig);
+					path.append(".png");
+					Image* figurine = new Image(path);
+					tile->set_image(*figurine);
+					gridBox.remove(*board[i][j].button);
+					board[i][j].button = tile;
+					gridBox.attach(*tile, j, i, 1, 1);
+				}
+			}
+		}
+		turn = 0;
+	}
+	gridBox.show_all();
+}
 void GameWindow::SendMoves(int oldX,int oldY,int newX,int newY) 
 {
-	
-	//board[oldX][oldY].hasFunc = true;
 	Glib::RefPtr<Gtk::CssProvider> css_white = Gtk::CssProvider::create();
 	css_white->load_from_data("button {background-image: image(gray);}");
 	for (int i = 0; i < 8; i++)
@@ -87,8 +176,7 @@ void GameWindow::SendMoves(int oldX,int oldY,int newX,int newY)
 	board[oldX][oldY].figurine = "None";
 	board[oldX][oldY].color = "NONE";
 	board[oldX][oldY].button->set_image(*emptyImage);
-
-
+	Turn();
 
 
 
@@ -1169,7 +1257,7 @@ void GameWindow::ShowBoard()
 		for (int j = 0; j < 8; j++)
 		{
 			Button* tile = new Button();
-			if (board[i][j].figurine != "None")
+			if (board[i][j].color == "WHITE")
 			{
 				string path = "D:\\GTKwindow\\Debug\\";
 				string fig = board[i][j].figurine;
@@ -1182,6 +1270,18 @@ void GameWindow::ShowBoard()
 				tile->set_image(*figurine);
 				tile->signal_clicked().connect(sigc::bind<string,string,int,int>(sigc::mem_fun(*this, &GameWindow::ShowMoves),fig,color,i,j));
 
+			}
+			if (board[i][j].color == "BLACK")
+			{
+				string path = "D:\\GTKwindow\\Debug\\";
+				string fig = board[i][j].figurine;
+				string color = board[i][j].color;
+				path.append(color);
+				path.append("_");
+				path.append(fig);
+				path.append(".png");
+				Image* figurine = new Image(path);
+				tile->set_image(*figurine);
 			}
 			board[i][j].button = tile;
 			gridBox.attach(*tile, j, i, 1, 1);

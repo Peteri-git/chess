@@ -78,42 +78,45 @@ void RoomWindow::listen() {
 	}
 	std::shared_ptr<grpc::ClientReader<GrpcGameService::GameCommandResponse>> status = client->Join(&ctx, req);
 	GameCommandResponse cmd;
-	while (status->Read(&cmd))
+	while (true)
 	{
-		if (cmd.has_start())
+		while (status->Read(&cmd))
 		{
-			auto color = cmd.start().color();
-			auto board = cmd.start().state().tiles();
-			auto gameid = cmd.start().gameid();
-
-
-			game->client = client;
-			game->status = status;
-			game->gameid = gameid;
-			game->color = GrpcGameService::Color_Name(color);
-
-			for (auto const& item : board) {
-				boardTile fgt;
-				fgt.color = GrpcGameService::Color_Name(item.figurinecolor());
-				fgt.figurine = GrpcGameService::Figurine_Name(item.figurine());
-				game->board[item.position().row()][item.position().column()] = fgt;
-			}
-			for (int i = 2; i < 6; i++)
+			if (cmd.has_start())
 			{
-				for (int j = 0; j < 8; j++)
-				{
+				auto color = cmd.start().color();
+				auto board = cmd.start().state().tiles();
+				auto gameid = cmd.start().gameid();
+
+
+				game->client = client;
+				game->status = status;
+				game->gameid = gameid;
+				game->color = GrpcGameService::Color_Name(color);
+
+				for (auto const& item : board) {
 					boardTile fgt;
-					fgt.color = "NONE";
-					fgt.figurine = "None";
-					fgt.hasFunc = false;
-					game->board[i][j] = fgt;
+					fgt.color = GrpcGameService::Color_Name(item.figurinecolor());
+					fgt.figurine = GrpcGameService::Figurine_Name(item.figurine());
+					game->board[item.position().row()][item.position().column()] = fgt;
+				}
+				for (int i = 2; i < 6; i++)
+				{
+					for (int j = 0; j < 8; j++)
+					{
+						boardTile fgt;
+						fgt.color = "NONE";
+						fgt.figurine = "None";
+						fgt.hasFunc = false;
+						game->board[i][j] = fgt;
+					}
 				}
 			}
-		}
-		if (cmd.has_move())
-		{
-			auto move = cmd.move();
-			game->UpdateMoves(move);
+			if (cmd.has_move())
+			{
+				auto move = cmd.move();
+				game->UpdateMoves(move);
+			}
 		}
 	}
 }
