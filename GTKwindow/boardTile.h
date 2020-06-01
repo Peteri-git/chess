@@ -3,6 +3,7 @@
 struct boardTile {
 	/*GrpcGameService::Color color;
 	GrpcGameService::Figurine figurine;*/
+	bool hasFunc;
 	std::string color;
 	std::string figurine;
 	Gtk::Button *button;

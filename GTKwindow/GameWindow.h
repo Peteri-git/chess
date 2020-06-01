@@ -30,6 +30,7 @@ public:
 	void UpdateMoves(GrpcGameService::GameMove move);
 protected:
 	void ShowBoard();
+	void EmptyFunction();
 	void SendMoves(int oldX, int oldY, int newX, int newY);
 	void ShowMoves(std::string figurine, std::string color,int x, int y);
 
