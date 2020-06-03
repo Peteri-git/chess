@@ -114,8 +114,8 @@ void RoomWindow::listen() {
 			}
 			if (cmd.has_move())
 			{
-				auto move = cmd.move();
-				game->UpdateMoves(move);
+				game->lastMove = cmd.move();
+				game->dispatcher();
 			}
 		}
 	}

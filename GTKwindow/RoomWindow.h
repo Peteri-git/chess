@@ -12,7 +12,7 @@
 #include <grpcpp/client_context.h>
 #include <grpcpp/create_channel.h>
 #include <grpcpp/security/credentials.h>
-
+#include <glibmm.h>
 #include "grpc/GameService.pb.h"
 #include "grpc/GameService.grpc.pb.h"
 using namespace Gtk;

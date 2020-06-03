@@ -15,13 +15,62 @@ GameWindow::GameWindow() :start_button("show board")
 	start_button.signal_clicked().connect(sigc::mem_fun(*this, &GameWindow::ShowBoard));
 	gridBox.attach(start_button, 0, 1, 1, 1);
 	gridBox.show_all();
+	dispatcher.connect(sigc::mem_fun(*this, &GameWindow::UpdateMoves));
 }
 GameWindow::~GameWindow()
 {
 }
-void GameWindow::UpdateMoves(GameMove move)
+void GameWindow::UpdateMoves()
 {
 	set_title("it did something");
+	int oldX = lastMove.from().row();
+	int oldY = lastMove.from().column();
+	int newX = lastMove.to().row();
+	int newY = lastMove.to().column();
+	Glib::RefPtr<Gtk::CssProvider> css_white = Gtk::CssProvider::create();
+	css_white->load_from_data("button {background-image: image(white);}");
+	for (int i = 0; i < 8; i++)
+	{
+		for (int j = 0; j < 8; j++)
+		{
+			copy_board[i][j].button->get_style_context()->add_provider(css_white, GTK_STYLE_PROVIDER_PRIORITY_USER);
+		}
+	}
+	for (int i = 0; i < 8; i++)
+	{
+		for (int j = 0; j < 8; j++)
+		{
+			if (i == oldX && j == oldY)
+			{
+				Button* tile = new Button();
+				gridBox.remove(*board[i][j].button);
+				board[i][j].button = tile;
+				gridBox.attach(*tile, j, i, 1, 1);
+			}
+		}
+	}
+	gridBox.show_all();
+	string path = "D:\\GTKwindow\\Debug\\";
+	string fig = board[oldX][oldY].figurine;
+	string color = board[oldX][oldY].color;
+	path.append(color);
+	path.append("_");
+	path.append(fig);
+	path.append(".png");
+	Image* figurine = new Image(path);
+	Image* emptyImage = new Image();
+	board[newX][newY].figurine = board[oldX][oldY].figurine;
+	board[newX][newY].color = board[oldX][oldY].color;
+	board[newX][newY].button->set_image(*figurine);
+	board[newX][newY].button->signal_clicked().connect(sigc::bind<string, string, int, int>(sigc::mem_fun(*this, &GameWindow::ShowMoves), board[newX][newY].figurine, board[newX][newY].color, newX, newY));
+	board[oldX][oldY].figurine = "None";
+	board[oldX][oldY].color = "NONE";
+	board[oldX][oldY].button->set_image(*emptyImage);
+	Turn();
+}
+void GameWindow::Promotion() 
+{
+
 }
 void GameWindow::Turn()
 {
@@ -115,71 +164,6 @@ void GameWindow::Turn()
 }
 void GameWindow::SendMoves(int oldX,int oldY,int newX,int newY) 
 {
-	Glib::RefPtr<Gtk::CssProvider> css_white = Gtk::CssProvider::create();
-	css_white->load_from_data("button {background-image: image(gray);}");
-	for (int i = 0; i < 8; i++)
-	{
-		for (int j = 0; j < 8; j++)
-		{
-			board[i][j].button->get_style_context()->add_provider(css_white, GTK_STYLE_PROVIDER_PRIORITY_USER);
-		}
-	}
-	for (int i = 0; i < 8; i++)
-	{
-		for (int j = 0; j < 8; j++)
-		{
-			if (board[i][j].hasFunc == true)
-			{
-				Button* tile = new Button();
-				if (board[i][j].figurine != "None")
-				{
-					string path = "D:\\GTKwindow\\Debug\\";
-					string fig = board[i][j].figurine;
-					string color = board[i][j].color;
-					path.append(color);
-					path.append("_");
-					path.append(fig);
-					path.append(".png");
-					Image* figurine = new Image(path);
-					tile->set_image(*figurine);
-					tile->signal_clicked().connect(sigc::bind<string, string, int, int>(sigc::mem_fun(*this, &GameWindow::ShowMoves), fig, color, i, j));
-				}
-				gridBox.remove(*board[i][j].button);
-				board[i][j].button = tile;
-				gridBox.attach(*tile, j, i, 1, 1);
-
-				board[i][j].hasFunc = false;
-			}
-			if (i == oldX && j == oldY)
-			{
-				Button* tile = new Button();
-				gridBox.remove(*board[i][j].button);
-				board[i][j].button = tile;
-				gridBox.attach(*tile, j, i, 1, 1);
-			}
-		}
-	}
-	gridBox.show_all();
-	string path = "D:\\GTKwindow\\Debug\\";
-	string fig = board[oldX][oldY].figurine;
-	string color = board[oldX][oldY].color;
-	path.append(color);
-	path.append("_");
-	path.append(fig);
-	path.append(".png");
-	Image* figurine = new Image(path);
-	Image* emptyImage = new Image();
-	board[newX][newY].figurine = board[oldX][oldY].figurine;
-	board[newX][newY].color = board[oldX][oldY].color;
-	board[newX][newY].button->set_image(*figurine);
-	board[newX][newY].button->signal_clicked().connect(sigc::bind<string, string, int, int>(sigc::mem_fun(*this, &GameWindow::ShowMoves), board[newX][newY].figurine, board[newX][newY].color, newX, newY));
-	board[oldX][oldY].figurine = "None";
-	board[oldX][oldY].color = "NONE";
-	board[oldX][oldY].button->set_image(*emptyImage);
-	Turn();
-
-
-
 	//status ok ale nefunguje
 	ClientContext ctx;
 	GameMoveRequest req;
@@ -198,18 +182,76 @@ void GameWindow::SendMoves(int oldX,int oldY,int newX,int newY)
 	auto status=client->Move(&ctx,req,&res);
 	if (status.ok())
 	{
-		
-	}
-}
-void GameWindow::EmptyFunction() {
+		Glib::RefPtr<Gtk::CssProvider> css_white = Gtk::CssProvider::create();
+		css_white->load_from_data("button {background-image: image(white);}");
+		for (int i = 0; i < 8; i++)
+		{
+			for (int j = 0; j < 8; j++)
+			{
+				board[i][j].button->get_style_context()->add_provider(css_white, GTK_STYLE_PROVIDER_PRIORITY_USER);
+			}
+		}
+		for (int i = 0; i < 8; i++)
+		{
+			for (int j = 0; j < 8; j++)
+			{
+				if (board[i][j].hasFunc == true)
+				{
+					Button* tile = new Button();
+					if (board[i][j].figurine != "None")
+					{
+						string path = "D:\\GTKwindow\\Debug\\";
+						string fig = board[i][j].figurine;
+						string color = board[i][j].color;
+						path.append(color);
+						path.append("_");
+						path.append(fig);
+						path.append(".png");
+						Image* figurine = new Image(path);
+						tile->set_image(*figurine);
+						tile->signal_clicked().connect(sigc::bind<string, string, int, int>(sigc::mem_fun(*this, &GameWindow::ShowMoves), fig, color, i, j));
+					}
+					gridBox.remove(*board[i][j].button);
+					board[i][j].button = tile;
+					gridBox.attach(*tile, j, i, 1, 1);
 
+					board[i][j].hasFunc = false;
+				}
+				if (i == oldX && j == oldY)
+				{
+					Button* tile = new Button();
+					gridBox.remove(*board[i][j].button);
+					board[i][j].button = tile;
+					gridBox.attach(*tile, j, i, 1, 1);
+				}
+			}
+		}
+		gridBox.show_all();
+		string path = "D:\\GTKwindow\\Debug\\";
+		string fig = board[oldX][oldY].figurine;
+		string color = board[oldX][oldY].color;
+		path.append(color);
+		path.append("_");
+		path.append(fig);
+		path.append(".png");
+		Image* figurine = new Image(path);
+		Image* emptyImage = new Image();
+		board[newX][newY].figurine = board[oldX][oldY].figurine;
+		board[newX][newY].color = board[oldX][oldY].color;
+		board[newX][newY].button->set_image(*figurine);
+		board[newX][newY].button->signal_clicked().connect(sigc::bind<string, string, int, int>(sigc::mem_fun(*this, &GameWindow::ShowMoves), board[newX][newY].figurine, board[newX][newY].color, newX, newY));
+		board[oldX][oldY].figurine = "None";
+		board[oldX][oldY].color = "NONE";
+		board[oldX][oldY].button->set_image(*emptyImage);
+		Turn();
+	}
 }
 void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 {
 	Glib::RefPtr<Gtk::CssProvider> css_red = Gtk::CssProvider::create();
 	Glib::RefPtr<Gtk::CssProvider> css_white = Gtk::CssProvider::create();
 	css_red->load_from_data("button {background-image: image(red);}");
-	css_white->load_from_data("button {background-image: image(gray);}");
+	css_white->load_from_data("button {background-image: image(white);}");
 	for (int i = 0; i < 8; i++)
 	{
 		for (int j = 0; j < 8; j++)
@@ -248,7 +290,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 	}
 	if (figurine == "King")
 	{
-		if (color == "BLACK")
+		if (color == "BLACK" && this->color == "BLACK")
 		{
 			if (x - 1 >= 0)
 			{
@@ -323,7 +365,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 				}
 			}
 		}
-		if (color == "WHITE")
+		if (color == "WHITE" && this->color == "WHITE")
 		{
 			if (x - 1 >= 0)
 			{
@@ -401,7 +443,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 	}
 	if (figurine == "Queen")
 	{
-		if (color == "BLACK")
+		if (color == "BLACK"&& this->color == "BLACK")
 		{
 			for (int i = 1; i < 8; i++)
 			{
@@ -564,7 +606,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 				}
 			}
 		}
-		if (color == "WHITE")
+		if (color == "WHITE" && this->color == "WHITE")
 		{
 			for (int i = 1; i < 8; i++)
 			{
@@ -730,7 +772,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 	}
 	if (figurine == "Rook")
 	{
-		if (color == "BLACK")
+		if (color == "BLACK" && this->color == "BLACK")
 		{
 			for (int i = 1; i < 8; i++)
 			{
@@ -813,7 +855,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 				}
 			}
 		}
-		if (color == "WHITE")
+		if (color == "WHITE" && this->color == "WHITE")
 		{
 			for (int i = 1; i < 8; i++)
 			{
@@ -899,7 +941,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 	}
 	if (figurine == "Knight")
 	{
-		if (color == "BLACK")
+		if (color == "BLACK" && this->color == "BLACK")
 		{
 			if (x - 1 >= 0 && y - 2 >= 0 && board[x - 1][y - 2].color != "BLACK")
 			{
@@ -950,7 +992,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 				board[x + 2][y + 1].hasFunc = true;
 			}
 		}
-		if (color == "WHITE")
+		if (color == "WHITE" && this->color == "WHITE")
 		{
 			if (x - 1 >= 0 && y - 2 >= 0 && board[x - 1][y - 2].color != "WHITE")
 			{
@@ -1004,7 +1046,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 	}
 	if (figurine == "Bishop")
 	{
-		if (color == "BLACK")
+		if (color == "BLACK" && this->color == "BLACK")
 		{
 			for (int i = 1; i < 8; i++)
 			{
@@ -1087,7 +1129,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 				}
 			}
 		}
-		if (color == "WHITE")
+		if (color == "WHITE" && this->color == "WHITE")
 		{
 			for (int i = 1; i < 8; i++)
 			{
@@ -1173,7 +1215,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 	}
 	if (figurine == "Pawn")
 	{
-		if (color == "BLACK")
+		if (color == "BLACK" && this->color == "BLACK")
 		{
 			if (x == 6)
 			{
@@ -1209,7 +1251,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 				board[x - 1][y + 1].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 1, y + 1));
 			}
 		}
-		if (color == "WHITE")
+		if (color == "WHITE" && this->color == "WHITE")
 		{
 			if (x == 1)
 			{
@@ -1285,6 +1327,15 @@ void GameWindow::ShowBoard()
 			}
 			board[i][j].button = tile;
 			gridBox.attach(*tile, j, i, 1, 1);
+		}
+	}
+	Glib::RefPtr<Gtk::CssProvider> css_white = Gtk::CssProvider::create();
+	css_white->load_from_data("button {background-image: image(white);}");
+	for (int i = 0; i < 8; i++)
+	{
+		for (int j = 0; j < 8; j++)
+		{
+			board[i][j].button->get_style_context()->add_provider(css_white, GTK_STYLE_PROVIDER_PRIORITY_USER);
 		}
 	}
 	gridBox.show_all();

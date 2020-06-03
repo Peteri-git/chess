@@ -8,10 +8,12 @@
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/entry.h>
 #include "boardTile.h"
+
 #include <grpc/grpc.h>
 #include <grpcpp/channel.h>
 #include <grpcpp/client_context.h>
 #include <grpcpp/create_channel.h>
+#include <glibmm.h>
 #include <grpcpp/security/credentials.h>
 
 #include "grpc/GameService.pb.h"
@@ -22,15 +24,19 @@ class GameWindow : public Gtk::Window
 public:
 	GameWindow();
 	virtual ~GameWindow();
+	Glib::Dispatcher dispatcher;
+	GrpcGameService::GameMove lastMove;
 	boardTile board[8][8];
 	std::string color;
 	std::shared_ptr<grpc::ClientReader<GrpcGameService::GameCommandResponse>> status;
 	std::shared_ptr<GrpcGameService::RoomService::Stub> client;
 	std::basic_string<char, std::char_traits<char>, std::allocator<char>> gameid;
-	void UpdateMoves(GrpcGameService::GameMove move);
+	
 protected:
 	void ShowBoard();
-	void EmptyFunction();
+	void UpdateMoves();
+	boardTile copy_board[8][8];
+	void Promotion();
 	void Turn();
 	void SendMoves(int oldX, int oldY, int newX, int newY);
 	void ShowMoves(std::string figurine, std::string color,int x, int y);
