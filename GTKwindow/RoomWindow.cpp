@@ -115,6 +115,19 @@ void RoomWindow::listen() {
 			if (cmd.has_move())
 			{
 				game->lastMove = cmd.move();
+				for (int i = 0; i < 8; i++)
+				{
+					for (int j = 0; j < 8; j++)
+					{
+						if ((cmd.move().from().row() == 6 && cmd.move().to().row() == 7) || (cmd.move().from().row() == 1 && cmd.move().to().row() == 0))
+						{
+							if (game->board[cmd.move().from().row()][cmd.move().from().column()].figurine == "Pawn")
+							{
+								game->UpdateFigurine = "Queen";
+							}
+						}
+					}
+				}
 				game->dispatcher();
 			}
 		}
@@ -130,6 +143,7 @@ void RoomWindow::add_button_clicked(){
 	if (status.ok())
 	{
 		Room tmp = resp.room();
+		room_dic.insert(pair<int, string >(tmp.roomid(), tmp.name().c_str()));
 		comboB.append(tmp.name().c_str());
 	}
 }

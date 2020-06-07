@@ -1,6 +1,7 @@
 #include "GameWindow.h"
 #include <iostream>
 #include <gtkmm/cssprovider.h>
+
 using namespace std;
 using namespace grpc;
 using namespace google::protobuf;
@@ -22,12 +23,11 @@ GameWindow::~GameWindow()
 }
 void GameWindow::UpdateMoves()
 {
-	set_title("it did something");
 	int oldX = lastMove.from().row();
 	int oldY = lastMove.from().column();
 	int newX = lastMove.to().row();
 	int newY = lastMove.to().column();
-	Glib::RefPtr<Gtk::CssProvider> css_white = Gtk::CssProvider::create();
+	/*Glib::RefPtr<Gtk::CssProvider> css_white = Gtk::CssProvider::create();
 	css_white->load_from_data("button {background-image: image(white);}");
 	for (int i = 0; i < 8; i++)
 	{
@@ -35,7 +35,7 @@ void GameWindow::UpdateMoves()
 		{
 			copy_board[i][j].button->get_style_context()->add_provider(css_white, GTK_STYLE_PROVIDER_PRIORITY_USER);
 		}
-	}
+	}*/
 	for (int i = 0; i < 8; i++)
 	{
 		for (int j = 0; j < 8; j++)
@@ -49,24 +49,78 @@ void GameWindow::UpdateMoves()
 			}
 		}
 	}
-	gridBox.show_all();
-	string path = "D:\\GTKwindow\\Debug\\";
-	string fig = board[oldX][oldY].figurine;
-	string color = board[oldX][oldY].color;
-	path.append(color);
-	path.append("_");
-	path.append(fig);
-	path.append(".png");
-	Image* figurine = new Image(path);
-	Image* emptyImage = new Image();
-	board[newX][newY].figurine = board[oldX][oldY].figurine;
-	board[newX][newY].color = board[oldX][oldY].color;
-	board[newX][newY].button->set_image(*figurine);
-	board[newX][newY].button->signal_clicked().connect(sigc::bind<string, string, int, int>(sigc::mem_fun(*this, &GameWindow::ShowMoves), board[newX][newY].figurine, board[newX][newY].color, newX, newY));
-	board[oldX][oldY].figurine = "None";
-	board[oldX][oldY].color = "NONE";
-	board[oldX][oldY].button->set_image(*emptyImage);
-	Turn();
+	if (UpdateFigurine != "" &&newX == 0)
+	{
+		gridBox.show_all();
+		string path = "D:\\GTKwindow\\Debug\\BLACK_Queen.png";
+		Image* figurine = new Image(path);
+		Image* emptyImage = new Image();
+		//boardTile endTile = board[newX][newY];
+		board[newX][newY].figurine = "Queen";
+		board[newX][newY].color = board[oldX][oldY].color;
+		board[newX][newY].button->set_image(*figurine);
+		board[newX][newY].button->signal_clicked().connect(sigc::bind<string, string, int, int>(sigc::mem_fun(*this, &GameWindow::ShowMoves), board[newX][newY].figurine, board[newX][newY].color, newX, newY));
+		board[oldX][oldY].figurine = "None";
+		board[oldX][oldY].color = "NONE";
+		board[oldX][oldY].button->set_image(*emptyImage);
+		Turn();
+		UpdateFigurine = "";
+	}
+	else if (UpdateFigurine != "" && newX == 7)
+	{
+		gridBox.show_all();
+		string path = "D:\\GTKwindow\\Debug\\WHITE_Queen.png";
+		Image* figurine = new Image(path);
+		Image* emptyImage = new Image();
+		//boardTile endTile = board[newX][newY];
+		board[newX][newY].figurine = "Queen";
+		board[newX][newY].color = board[oldX][oldY].color;
+		board[newX][newY].button->set_image(*figurine);
+		board[newX][newY].button->signal_clicked().connect(sigc::bind<string, string, int, int>(sigc::mem_fun(*this, &GameWindow::ShowMoves), board[newX][newY].figurine, board[newX][newY].color, newX, newY));
+		board[oldX][oldY].figurine = "None";
+		board[oldX][oldY].color = "NONE";
+		board[oldX][oldY].button->set_image(*emptyImage);
+		Turn();
+		UpdateFigurine = "";
+	}
+	else
+	{
+		gridBox.show_all();
+		string path = "D:\\GTKwindow\\Debug\\";
+		string fig = board[oldX][oldY].figurine;
+		string color = board[oldX][oldY].color;
+		path.append(color);
+		path.append("_");
+		path.append(fig);
+		path.append(".png");
+		Image* figurine = new Image(path);
+		Image* emptyImage = new Image();
+		/*boardTile* endTile = new boardTile();*/
+		/*endTile->button = board[newX][newY].button;
+		endTile->color = board[newX][newY].color;
+		endTile->figurine = board[newX][newY].figurine;
+		endTile->hasFunc = board[newX][newY].hasFunc;*/
+		board[newX][newY].figurine = board[oldX][oldY].figurine;
+		board[newX][newY].color = board[oldX][oldY].color;
+		board[newX][newY].button->set_image(*figurine);
+		board[newX][newY].button->signal_clicked().connect(sigc::bind<string, string, int, int>(sigc::mem_fun(*this, &GameWindow::ShowMoves), board[newX][newY].figurine, board[newX][newY].color, newX, newY));
+		board[oldX][oldY].figurine = "None";
+		board[oldX][oldY].color = "NONE";
+		board[oldX][oldY].button->set_image(*emptyImage);
+		Turn();
+	}
+	//if (endTile->figurine != "King")
+	//{
+	//	Turn();
+	//}
+	//if (endTile->figurine == "King")
+	//{
+	//	string end = "The game was lost by ";
+	//	end.append(endTile.color);
+	//	msgBox->set_secondary_text(end);
+	//	msgBox->run();
+	//	//msgBox->signal_button_press_event().connect();
+	//}
 }
 void GameWindow::Promotion() 
 {
@@ -162,9 +216,8 @@ void GameWindow::Turn()
 	}
 	gridBox.show_all();
 }
-void GameWindow::SendMoves(int oldX,int oldY,int newX,int newY) 
+void GameWindow::SendMoves(int oldX,int oldY,int newX,int newY, string figurine) 
 {
-	//status ok ale nefunguje
 	ClientContext ctx;
 	GameMoveRequest req;
 	Position *from = new Position();
@@ -226,24 +279,77 @@ void GameWindow::SendMoves(int oldX,int oldY,int newX,int newY)
 				}
 			}
 		}
-		gridBox.show_all();
-		string path = "D:\\GTKwindow\\Debug\\";
-		string fig = board[oldX][oldY].figurine;
-		string color = board[oldX][oldY].color;
-		path.append(color);
-		path.append("_");
-		path.append(fig);
-		path.append(".png");
-		Image* figurine = new Image(path);
-		Image* emptyImage = new Image();
-		board[newX][newY].figurine = board[oldX][oldY].figurine;
-		board[newX][newY].color = board[oldX][oldY].color;
-		board[newX][newY].button->set_image(*figurine);
-		board[newX][newY].button->signal_clicked().connect(sigc::bind<string, string, int, int>(sigc::mem_fun(*this, &GameWindow::ShowMoves), board[newX][newY].figurine, board[newX][newY].color, newX, newY));
-		board[oldX][oldY].figurine = "None";
-		board[oldX][oldY].color = "NONE";
-		board[oldX][oldY].button->set_image(*emptyImage);
-		Turn();
+		if (newX == 0 && figurine == "Pawn")
+		{
+			gridBox.show_all();
+			string path = "D:\\GTKwindow\\Debug\\BLACK_Queen.png";
+			Image* figurine = new Image(path);
+			Image* emptyImage = new Image();
+			auto endTile = board[newX][newY];
+			board[newX][newY].figurine = "Queen";
+			board[newX][newY].color = board[oldX][oldY].color;
+			board[newX][newY].button->set_image(*figurine);
+			board[newX][newY].button->signal_clicked().connect(sigc::bind<string, string, int, int>(sigc::mem_fun(*this, &GameWindow::ShowMoves), board[newX][newY].figurine, board[newX][newY].color, newX, newY));
+			board[oldX][oldY].figurine = "None";
+			board[oldX][oldY].color = "NONE";
+			board[oldX][oldY].button->set_image(*emptyImage);
+			Turn();
+		}
+		else if (newX == 7 && figurine == "Pawn")
+		{
+			gridBox.show_all();
+			string path = "D:\\GTKwindow\\Debug\\WHITE_Queen.png";
+
+			Image* figurine = new Image(path);
+			Image* emptyImage = new Image();
+			auto endTile = board[newX][newY];
+			board[newX][newY].figurine = "Queen";
+			board[newX][newY].color = board[oldX][oldY].color;
+			board[newX][newY].button->set_image(*figurine);
+			board[newX][newY].button->signal_clicked().connect(sigc::bind<string, string, int, int>(sigc::mem_fun(*this, &GameWindow::ShowMoves), board[newX][newY].figurine, board[newX][newY].color, newX, newY));
+			board[oldX][oldY].figurine = "None";
+			board[oldX][oldY].color = "NONE";
+			board[oldX][oldY].button->set_image(*emptyImage);
+			Turn();
+		}
+		else
+		{
+			gridBox.show_all();
+			string path = "D:\\GTKwindow\\Debug\\";
+			string fig = board[oldX][oldY].figurine;
+			string color = board[oldX][oldY].color;
+			path.append(color);
+			path.append("_");
+			path.append(fig);
+			path.append(".png");
+			Image* figurine = new Image(path);
+			Image* emptyImage = new Image();
+			//auto endTile = board[newX][newY];
+			board[newX][newY].figurine = board[oldX][oldY].figurine;
+			board[newX][newY].color = board[oldX][oldY].color;
+			board[newX][newY].button->set_image(*figurine);
+			board[newX][newY].button->signal_clicked().connect(sigc::bind<string, string, int, int>(sigc::mem_fun(*this, &GameWindow::ShowMoves), board[newX][newY].figurine, board[newX][newY].color, newX, newY));
+			board[oldX][oldY].figurine = "None";
+			board[oldX][oldY].color = "NONE";
+			board[oldX][oldY].button->set_image(*emptyImage);
+			Turn();
+		}
+		
+
+		//if (endTile.figurine != "King")
+		//{
+		//	Turn();
+		//}
+		//if (endTile.figurine == "King")
+		//{
+		//	string end = "The game was lost by ";
+		//	end.append(endTile.color);
+		//	MessageDialog* msgBox = new MessageDialog("The game ended!");
+		//	msgBox->set_secondary_text(end);
+		//	msgBox->run();
+		//	//msgBox->signal_button_press_event().connect();
+
+		//}
 	}
 }
 void GameWindow::ShowMoves(string figurine, string color,int x,int y)
@@ -297,7 +403,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 				if (board[x - 1][y].color != "BLACK")
 				{
 					board[x - 1][y].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-					board[x - 1][y].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 1, y));
+					board[x - 1][y].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 1, y, figurine));
 					board[x - 1][y].hasFunc = true;
 				}
 				if (y - 1 < 8)
@@ -305,7 +411,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x - 1][y + 1].color != "BLACK")
 					{
 						board[x - 1][y + 1].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x - 1][y + 1].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 1, y + 1));
+						board[x - 1][y + 1].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 1, y + 1,figurine));
 						board[x - 1][y + 1].hasFunc = true;
 					}
 				}
@@ -314,7 +420,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x - 1][y - 1].color != "BLACK")
 					{
 						board[x - 1][y - 1].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x - 1][y - 1].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 1, y - 1));
+						board[x - 1][y - 1].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 1, y - 1,figurine));
 						board[x - 1][y - 1].hasFunc = true;
 					}
 				}
@@ -324,7 +430,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 				if (board[x][y-1].color != "BLACK")
 				{
 					board[x][y - 1].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-					board[x][y - 1].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x, y - 1));
+					board[x][y - 1].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x, y - 1,figurine));
 					board[x][y - 1].hasFunc = true;
 				}
 			}
@@ -333,7 +439,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 				if (board[x][y + 1].color != "BLACK")
 				{
 					board[x][y + 1].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-					board[x][y + 1].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x, y + 1));
+					board[x][y + 1].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x, y + 1,figurine));
 					board[x][y + 1].hasFunc = true;
 				}
 			}
@@ -342,7 +448,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 				if (board[x + 1][y].color != "BLACK")
 				{
 					board[x + 1][y].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-					board[x + 1][y].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 1, y));
+					board[x + 1][y].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 1, y,figurine));
 					board[x + 1][y].hasFunc = true;
 				}
 				if (y - 1 < 8)
@@ -350,7 +456,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x + 1][y + 1].color != "BLACK")
 					{
 						board[x + 1][y + 1].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x + 1][y + 1].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 1, y + 1));
+						board[x + 1][y + 1].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 1, y + 1,figurine));
 						board[x + 1][y + 1].hasFunc = true;
 					}
 				}
@@ -359,7 +465,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x + 1][y - 1].color != "BLACK")
 					{
 						board[x + 1][y - 1].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x + 1][y - 1].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 1, y - 1));
+						board[x + 1][y - 1].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 1, y - 1,figurine));
 						board[x + 1][y - 1].hasFunc = true;
 					}
 				}
@@ -372,7 +478,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 				if (board[x - 1][y].color != "WHITE")
 				{
 					board[x - 1][y].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-					board[x - 1][y].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 1, y));
+					board[x - 1][y].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 1, y,figurine));
 					board[x - 1][y].hasFunc = true;
 				}
 				if (y - 1 < 8)
@@ -380,7 +486,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x - 1][y + 1].color != "WHITE")
 					{
 						board[x - 1][y + 1].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x - 1][y + 1].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 1, y + 1));
+						board[x - 1][y + 1].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 1, y + 1,figurine));
 						board[x - 1][y + 1].hasFunc = true;
 					}
 				}
@@ -389,7 +495,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x - 1][y - 1].color != "WHITE")
 					{
 						board[x - 1][y - 1].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x - 1][y - 1].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 1, y - 1));
+						board[x - 1][y - 1].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 1, y - 1,figurine));
 						board[x - 1][y - 1].hasFunc = true;
 					}
 				}
@@ -399,7 +505,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 				if (board[x][y - 1].color != "WHITE")
 				{
 					board[x][y - 1].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-					board[x][y - 1].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x, y - 1));
+					board[x][y - 1].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x, y - 1,figurine));
 					board[x][y - 1].hasFunc = true;
 				}
 			}
@@ -408,7 +514,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 				if (board[x][y + 1].color != "WHITE")
 				{
 					board[x][y + 1].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-					board[x][y + 1].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x, y + 1));
+					board[x][y + 1].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x, y + 1,figurine));
 					board[x][y + 1].hasFunc = true;
 				}
 			}
@@ -417,7 +523,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 				if (board[x + 1][y].color != "WHITE")
 				{
 					board[x + 1][y].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-					board[x + 1][y].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 1, y));
+					board[x + 1][y].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 1, y,figurine));
 					board[x + 1][y].hasFunc = true;
 				}
 				if (y - 1 < 8)
@@ -425,7 +531,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x + 1][y + 1].color != "WHITE")
 					{
 						board[x + 1][y + 1].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x + 1][y + 1].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 1, y + 1));
+						board[x + 1][y + 1].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 1, y + 1,figurine));
 						board[x + 1][y + 1].hasFunc = true;
 					}
 				}
@@ -434,7 +540,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x + 1][y - 1].color != "WHITE")
 					{
 						board[x + 1][y - 1].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x + 1][y - 1].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 1, y - 1));
+						board[x + 1][y - 1].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 1, y - 1,figurine));
 						board[x + 1][y - 1].hasFunc = true;
 					}
 				}
@@ -452,7 +558,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x - i][y].color != "BLACK")
 					{
 						board[x - i][y].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x - i][y].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - i, y));
+						board[x - i][y].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - i, y,figurine));
 						board[x - i][y].hasFunc = true;
 						if (board[x - i][y].color == "WHITE")
 						{
@@ -472,7 +578,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x + i][y].color != "BLACK")
 					{
 						board[x + i][y].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x + i][y].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + i, y));
+						board[x + i][y].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + i, y,figurine));
 						board[x + i][y].hasFunc = true;
 						if (board[x + i][y].color == "WHITE")
 						{
@@ -492,7 +598,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x][y - i].color != "BLACK")
 					{
 						board[x][y - i].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x][y - i].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x, y - i));
+						board[x][y - i].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x, y - i,figurine));
 						board[x][y - i].hasFunc = true;
 						if (board[x][y - i].color == "WHITE")
 						{
@@ -512,7 +618,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x][y + i].color != "BLACK")
 					{
 						board[x][y + i].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x][y + i].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x, y + i));
+						board[x][y + i].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x, y + i,figurine));
 						board[x][y + i].hasFunc = true;
 						if (board[x][y + i].color == "WHITE")
 						{
@@ -532,7 +638,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x - i][y - i].color != "BLACK")
 					{
 						board[x - i][y - i].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x - i][y - i].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - i, y - i));
+						board[x - i][y - i].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - i, y - i,figurine));
 						board[x - i][y - i].hasFunc = true;
 						if (board[x - i][y - i].color == "WHITE")
 						{
@@ -552,7 +658,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x - i][y + i].color != "BLACK")
 					{
 						board[x - i][y + i].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x - i][y + i].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - i, y + i));
+						board[x - i][y + i].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - i, y + i,figurine));
 						board[x - i][y + i].hasFunc = true;
 						if (board[x - i][y + i].color == "WHITE")
 						{
@@ -572,7 +678,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x + i][y - i].color != "BLACK")
 					{
 						board[x + i][y - i].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x + i][y - i].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + i, y - i));
+						board[x + i][y - i].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + i, y - i,figurine));
 						board[x + i][y - i].hasFunc = true;
 						if (board[x + i][y - i].color == "WHITE")
 						{
@@ -592,7 +698,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x + i][y + i].color != "BLACK")
 					{
 						board[x + i][y + i].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x + i][y + i].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + i, y + i));
+						board[x + i][y + i].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + i, y + i,figurine));
 						board[x + i][y + i].hasFunc = true;
 						if (board[x + i][y + i].color == "WHITE")
 						{
@@ -615,7 +721,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x - i][y].color != "WHITE")
 					{
 						board[x - i][y].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x - i][y].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - i, y));
+						board[x - i][y].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - i, y,figurine));
 						board[x - i][y].hasFunc = true;
 						if (board[x - i][y].color == "BLACK")
 						{
@@ -635,7 +741,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x + i][y].color != "WHITE")
 					{
 						board[x + i][y].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x + i][y].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + i, y));
+						board[x + i][y].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + i, y,figurine));
 						board[x + i][y].hasFunc = true;
 						if (board[x + i][y].color == "BLACK")
 						{
@@ -655,7 +761,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x][y - i].color != "WHITE")
 					{
 						board[x][y - i].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x][y - i].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x, y - i));
+						board[x][y - i].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x, y - i,figurine));
 						board[x][y - i].hasFunc = true;
 						if (board[x][y - i].color == "BLACK")
 						{
@@ -675,7 +781,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x][y + i].color != "WHITE")
 					{
 						board[x][y + i].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x][y + i].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x, y + i));
+						board[x][y + i].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x, y + i,figurine));
 						board[x][y + i].hasFunc = true;
 						if (board[x][y + i].color == "BLACK")
 						{
@@ -695,7 +801,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x - i][y - i].color != "WHITE")
 					{
 						board[x - i][y - i].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x - i][y - i].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - i, y - i));
+						board[x - i][y - i].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - i, y - i,figurine));
 						board[x - i][y - i].hasFunc = true;
 						if (board[x - i][y - i].color == "BLACK")
 						{
@@ -715,7 +821,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x - i][x + i].color != "WHITE")
 					{
 						board[x - i][y + i].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x - i][y + i].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - i, y + i));
+						board[x - i][y + i].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - i, y + i,figurine));
 						board[x - i][y + i].hasFunc = true;
 						if (board[x - i][y + i].color == "BLACK")
 						{
@@ -735,7 +841,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x + i][y - i].color != "WHITE")
 					{
 						board[x + i][y - i].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x + i][y - i].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + i, y - i));
+						board[x + i][y - i].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + i, y - i,figurine));
 						board[x + i][y - i].hasFunc = true;
 						if (board[x + i][y - i].color == "BLACK")
 						{
@@ -755,7 +861,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x + i][y + i].color != "WHITE")
 					{
 						board[x + i][y + i].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x + i][y + i].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + i, y + i));
+						board[x + i][y + i].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + i, y + i,figurine));
 						board[x + i][y + i].hasFunc = true;
 						if (board[x + i][y + i].color == "BLACK")
 						{
@@ -781,7 +887,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x-i][y].color !="BLACK")
 					{
 						board[x - i][y].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x - i][y].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - i, y));
+						board[x - i][y].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - i, y,figurine));
 						board[x - i][y].hasFunc = true;
 						if (board[x - i][y].color == "WHITE")
 						{
@@ -801,7 +907,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x+i][y].color !="BLACK")
 					{
 						board[x + i][y].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x + i][y].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + i, y));
+						board[x + i][y].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + i, y,figurine));
 						board[x + i][y].hasFunc = true;
 						if (board[x + i][y].color == "WHITE")
 						{
@@ -821,7 +927,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x][y-i].color !="BLACK")
 					{
 						board[x][y - i].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x][y - i].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x, y - i));
+						board[x][y - i].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x, y - i,figurine));
 						board[x][y - i].hasFunc = true;
 						if (board[x][y - i].color == "WHITE")
 						{
@@ -841,7 +947,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x][y+i].color !="BLACK")
 					{
 						board[x][y + i].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x][y + i].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x, y + i));
+						board[x][y + i].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x, y + i,figurine));
 						board[x][y + i].hasFunc = true;
 						if (board[x][y + i].color == "WHITE")
 						{
@@ -864,7 +970,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x-i][y].color !="WHITE")
 					{
 						board[x - i][y].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x - i][y].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - i, y));
+						board[x - i][y].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - i, y,figurine));
 						board[x - i][y].hasFunc = true;
 						if (board[x - i][y].color == "BLACK")
 						{
@@ -884,7 +990,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x+i][y].color !="WHITE")
 					{
 						board[x + i][y].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x + i][y].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + i, y));
+						board[x + i][y].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + i, y,figurine));
 						board[x + i][y].hasFunc = true;
 						if (board[x + i][y].color == "BLACK")
 						{
@@ -904,7 +1010,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x][y-i].color !="WHITE")
 					{
 						board[x][y - i].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x][y - i].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x, y - i));
+						board[x][y - i].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x, y - i,figurine));
 						board[x][y - i].hasFunc = true;
 						if (board[x][y - i].color == "BLACK")
 						{
@@ -924,7 +1030,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x][y+i].color !="WHITE")
 					{
 						board[x][y + i].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x][y + i].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x, y + i));
+						board[x][y + i].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x, y + i,figurine));
 						board[x][y + i].hasFunc = true;
 						if (board[x][y + i].color == "BLACK")
 						{
@@ -946,49 +1052,49 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 			if (x - 1 >= 0 && y - 2 >= 0 && board[x - 1][y - 2].color != "BLACK")
 			{
 				board[x - 1][y - 2].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-				board[x - 1][y - 2].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 1, y - 2));
+				board[x - 1][y - 2].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 1, y - 2,figurine));
 				board[x - 1][y - 2].hasFunc = true;
 			}
 			if (x - 1 >= 0 && y + 2 < 8 && board[x - 1][y + 2].color != "BLACK")
 			{
 				board[x - 1][y + 2].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-				board[x - 1][y + 2].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 1, y + 2));
+				board[x - 1][y + 2].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 1, y + 2,figurine));
 				board[x - 1][y + 2].hasFunc = true;
 			}
 			if (x - 2 >= 0 && y - 1 >= 0 && board[x - 2][y - 1].color != "BLACK")
 			{
 				board[x - 2][y - 1].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-				board[x - 2][y - 1].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 2, y - 1));
+				board[x - 2][y - 1].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 2, y - 1,figurine));
 				board[x - 2][y - 1].hasFunc = true;
 			}
 			if (x - 2 >= 0 && y + 1 < 8 && board[x - 2][y + 1].color != "BLACK")
 			{
 				board[x - 2][y + 1].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-				board[x - 2][y + 1].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 2, y + 1));
+				board[x - 2][y + 1].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 2, y + 1,figurine));
 				board[x - 2][y + 1].hasFunc = true;
 			}
 			if (x + 1 < 8 && y - 2 >= 0 && board[x + 1][y - 2].color != "BLACK")
 			{
 				board[x + 1][y - 2].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-				board[x + 1][y - 2].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 1, y - 2));
+				board[x + 1][y - 2].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 1, y - 2,figurine));
 				board[x + 1][y - 2].hasFunc = true;
 			}
 			if (x + 1 < 8 && y + 2 < 8 && board[x + 1][y + 2].color != "BLACK")
 			{
 				board[x + 1][y + 2].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-				board[x + 1][y + 2].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 1, y + 2));
+				board[x + 1][y + 2].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 1, y + 2,figurine));
 				board[x + 1][y + 2].hasFunc = true;
 			}
 			if (x + 2 < 8 && y - 1 >= 0 && board[x + 2][y - 1].color != "BLACK")
 			{
 				board[x + 2][y - 1].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-				board[x + 2][y - 1].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 2, y - 1));
+				board[x + 2][y - 1].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 2, y - 1,figurine));
 				board[x + 2][y - 1].hasFunc = true;
 			}
 			if (x + 2 < 8 && y + 1 >= 0 && board[x + 2][y + 1].color != "BLACK")
 			{
 				board[x + 2][y + 1].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-				board[x + 2][y + 1].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 2, y + 1));
+				board[x + 2][y + 1].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 2, y + 1,figurine));
 				board[x + 2][y + 1].hasFunc = true;
 			}
 		}
@@ -997,49 +1103,49 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 			if (x - 1 >= 0 && y - 2 >= 0 && board[x - 1][y - 2].color != "WHITE")
 			{
 				board[x - 1][y - 2].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-				board[x - 1][y - 2].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 1, y - 2));
+				board[x - 1][y - 2].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 1, y - 2,figurine));
 				board[x - 1][y - 2].hasFunc = true;
 			}
 			if (x - 1 >= 0 && y + 2 < 8 && board[x - 1][y + 2].color != "WHITE")
 			{
 				board[x - 1][y + 2].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-				board[x - 1][y + 2].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 1, y + 2));
+				board[x - 1][y + 2].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 1, y + 2,figurine));
 				board[x - 1][y + 2].hasFunc = true;
 			}
 			if (x - 2 >= 0 && y - 1 >= 0 && board[x - 2][y - 1].color != "WHITE")
 			{
 				board[x - 2][y - 1].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-				board[x - 2][y - 1].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 2, y - 1));
+				board[x - 2][y - 1].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 2, y - 1,figurine));
 				board[x - 2][y - 1].hasFunc = true;
 			}
 			if (x - 2 >= 0 && y + 1 < 8 && board[x - 2][y + 1].color != "WHITE")
 			{
 				board[x - 2][y + 1].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-				board[x - 2][y + 1].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 2, y + 1));
+				board[x - 2][y + 1].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 2, y + 1,figurine));
 				board[x - 2][y + 1].hasFunc = true;
 			}
 			if (x + 1 < 8 && y - 2 >= 0 && board[x + 1][y - 2].color != "WHITE")
 			{
 				board[x + 1][y - 2].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-				board[x + 1][y - 2].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 1, y - 2));
+				board[x + 1][y - 2].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 1, y - 2,figurine));
 				board[x + 1][y - 2].hasFunc = true;
 			}
 			if (x + 1 < 8 && y + 2 < 8 && board[x + 1][y + 2].color != "WHITE")
 			{
 				board[x + 1][y + 2].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-				board[x + 1][y + 2].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 1, y + 2));
+				board[x + 1][y + 2].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 1, y + 2,figurine));
 				board[x + 1][y + 2].hasFunc = true;
 			}
 			if (x + 2 < 8 && y - 1 >= 0 && board[x + 2][y - 1].color != "WHITE")
 			{
 				board[x + 2][y - 1].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-				board[x + 2][y - 1].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 2, y - 1));
+				board[x + 2][y - 1].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 2, y - 1,figurine));
 				board[x + 2][y - 1].hasFunc = true;
 			}
 			if (x + 2 < 8 && y + 1 >= 0 && board[x + 2][y - 1].color != "WHITE")
 			{
 				board[x + 2][y + 1].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-				board[x + 2][y + 1].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 2, y + 1));
+				board[x + 2][y + 1].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 2, y + 1,figurine));
 				board[x + 2][y + 1].hasFunc = true;
 			}
 		}
@@ -1055,7 +1161,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x-i][y-i].color != "BLACK")
 					{
 						board[x - i][y - i].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x - i][y - i].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - i, y - i));
+						board[x - i][y - i].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - i, y - i,figurine));
 						board[x - i][y - i].hasFunc = true;
 						if (board[x - i][y - i].color == "WHITE")
 						{
@@ -1075,7 +1181,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x-i][y+i].color != "BLACK")
 					{
 						board[x - i][y + i].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x - i][y + i].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - i, y + i));
+						board[x - i][y + i].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - i, y + i,figurine));
 						board[x - i][y + i].hasFunc = true;
 						if (board[x - i][y + i].color == "WHITE")
 						{
@@ -1095,7 +1201,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x+i][y-i].color !="BLACK")
 					{
 						board[x + i][y - i].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x + i][y - i].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + i, y - i));
+						board[x + i][y - i].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + i, y - i,figurine));
 						board[x + i][y - i].hasFunc = true;
 						if (board[x + i][y - i].color == "WHITE")
 						{
@@ -1115,7 +1221,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x+i][y+i].color!="BLACK")
 					{
 						board[x + i][y + i].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x + i][y + i].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + i, y + i));
+						board[x + i][y + i].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + i, y + i,figurine));
 						board[x + i][y + i].hasFunc = true;
 						if (board[x + i][y + i].color == "WHITE")
 						{
@@ -1138,7 +1244,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x-i][y-i].color !="WHITE")
 					{
 						board[x - i][y - i].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x - i][y - i].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - i, y - i));
+						board[x - i][y - i].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - i, y - i,figurine));
 						board[x - i][y - i].hasFunc = true;
 						if (board[x - i][y - i].color == "BLACK")
 						{
@@ -1158,7 +1264,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x-i][x+i].color != "WHITE")
 					{
 						board[x - i][y + i].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x - i][y + i].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - i, y + i));
+						board[x - i][y + i].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - i, y + i,figurine));
 						board[x - i][y + i].hasFunc = true;
 						if (board[x - i][y + i].color == "BLACK")
 						{
@@ -1178,7 +1284,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x+i][y-i].color != "WHITE")
 					{
 						board[x + i][y - i].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x + i][y - i].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + i, y - i));
+						board[x + i][y - i].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + i, y - i,figurine));
 						board[x + i][y - i].hasFunc = true;
 						if (board[x + i][y - i].color == "BLACK")
 						{
@@ -1198,7 +1304,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					if (board[x+i][y+i].color != "WHITE")
 					{
 						board[x + i][y + i].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
-						board[x + i][y + i].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + i, y + i));
+						board[x + i][y + i].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + i, y + i,figurine));
 						board[x + i][y + i].hasFunc = true;
 						if (board[x + i][y + i].color == "BLACK")
 						{
@@ -1223,12 +1329,12 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 				{
 					board[x - 1][y].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
 					board[x - 1][y].hasFunc = true;
-					board[x - 1][y].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 1, y));
+					board[x - 1][y].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 1, y,figurine));
 					if (board[x - 2][y].figurine == "None" && x - 2 >= 0)
 					{
 						board[x - 2][y].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
 						board[x - 2][y].hasFunc = true;
-						board[x - 2][y].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 2, y));
+						board[x - 2][y].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 2, y,figurine));
 					}
 				}
 			}
@@ -1236,19 +1342,19 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 			{
 				board[x - 1][y].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
 				board[x - 1][y].hasFunc = true;
-				board[x - 1][y].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 1, y));
+				board[x - 1][y].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 1, y,figurine));
 			}
 			if (x - 1 >= 0 && y - 1 >= 0 && board[x - 1][y - 1].color == "WHITE")
 			{
 				board[x - 1][y - 1].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
 				board[x - 1][y - 1].hasFunc = true;
-				board[x - 1][y - 1].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 1, y - 1));
+				board[x - 1][y - 1].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 1, y - 1,figurine));
 			}
 			if (x - 1 >= 0 && y + 1 < 8 && board[x - 1][y + 1].color == "WHITE")
 			{
 				board[x - 1][y + 1].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
 				board[x - 1][y + 1].hasFunc = true;
-				board[x - 1][y + 1].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 1, y + 1));
+				board[x - 1][y + 1].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x - 1, y + 1,figurine));
 			}
 		}
 		if (color == "WHITE" && this->color == "WHITE")
@@ -1259,12 +1365,12 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 				{
 					board[x + 1][y].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
 					board[x + 1][y].hasFunc = true;
-					board[x + 1][y].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 1, y));
+					board[x + 1][y].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 1, y,figurine));
 					if (board[x+2][y].figurine == "None" && x + 2 < 8)
 					{
 						board[x + 2][y].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
 						board[x + 2][y].hasFunc = true;
-						board[x + 2][y].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 2, y));
+						board[x + 2][y].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 2, y,figurine));
 					}
 				}
 			}
@@ -1272,19 +1378,19 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 			{
 				board[x + 1][y].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
 				board[x + 1][y].hasFunc = true;
-				board[x + 1][y].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 1, y));
+				board[x + 1][y].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 1, y,figurine));
 			}
 			if (x + 1 < 8 && y - 1 >= 0 && board[x + 1][y - 1].color == "BLACK")
 			{
 				board[x + 1][y - 1].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
 				board[x + 1][y - 1].hasFunc = true;
-				board[x + 1][y - 1].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 1, y - 1));
+				board[x + 1][y - 1].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 1, y - 1,figurine));
 			}
 			if (x + 1 < 8 && y + 1 < 8 && board[x + 1][y + 1].color == "BLACK")
 			{
 				board[x + 1][y + 1].button->get_style_context()->add_provider(css_red, GTK_STYLE_PROVIDER_PRIORITY_USER);
 				board[x + 1][y + 1].hasFunc = true;
-				board[x + 1][y + 1].button->signal_clicked().connect(sigc::bind<int, int, int, int>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 1, y + 1));
+				board[x + 1][y + 1].button->signal_clicked().connect(sigc::bind<int, int, int, int,string>(sigc::mem_fun(*this, &GameWindow::SendMoves), x, y, x + 1, y + 1,figurine));
 			}
 		}
 	}

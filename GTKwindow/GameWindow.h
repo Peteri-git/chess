@@ -14,6 +14,7 @@
 #include <grpcpp/client_context.h>
 #include <grpcpp/create_channel.h>
 #include <glibmm.h>
+#include <gtkmm\messagedialog.h>
 #include <grpcpp/security/credentials.h>
 
 #include "grpc/GameService.pb.h"
@@ -28,6 +29,7 @@ public:
 	GrpcGameService::GameMove lastMove;
 	boardTile board[8][8];
 	std::string color;
+	std::string UpdateFigurine = "";
 	std::shared_ptr<grpc::ClientReader<GrpcGameService::GameCommandResponse>> status;
 	std::shared_ptr<GrpcGameService::RoomService::Stub> client;
 	std::basic_string<char, std::char_traits<char>, std::allocator<char>> gameid;
@@ -38,10 +40,11 @@ protected:
 	boardTile copy_board[8][8];
 	void Promotion();
 	void Turn();
-	void SendMoves(int oldX, int oldY, int newX, int newY);
+	void SendMoves(int oldX, int oldY, int newX, int newY, std::string figurine);
 	void ShowMoves(std::string figurine, std::string color,int x, int y);
 	int turn = 0;
 	Gtk::Grid gridBox;
+	Gtk::MessageDialog* msgBox = new Gtk::MessageDialog("The game ended!");
 	Gtk::Button start_button;
 	Gtk::Image king;
 };
