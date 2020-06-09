@@ -29,7 +29,7 @@ RoomWindow::RoomWindow() : comboB(),join_button("Join Room!"),add_button("Add Ro
 	add(m_box);
 	m_box.pack_end(join_button);
 	m_box.pack_end(add_button);
-	m_box.set_margin_bottom(0);
+	//m_box.set_margin_bottom(0);
 
 	
 	ClientContext ctx;
@@ -46,7 +46,7 @@ RoomWindow::RoomWindow() : comboB(),join_button("Join Room!"),add_button("Add Ro
 			comboB.append(item.name().c_str());
 		}
 	}
-	comboB.set_active(1);
+	//comboB.set_active(1);
 	
 	add_button.signal_clicked().connect(sigc::mem_fun(*this, &RoomWindow::add_button_clicked));
 	join_button.signal_clicked().connect(sigc::mem_fun(*this, &RoomWindow::join_button_clicked));
@@ -126,6 +126,13 @@ void RoomWindow::listen() {
 								game->UpdateFigurine = "Queen";
 							}
 						}
+						if ((cmd.move().from().row() == 7 && cmd.move().from().column() == 4 && cmd.move().to().row() == 7 && cmd.move().to().column() == 2 &&game->board[cmd.move().from().row()][cmd.move().from().column()].figurine == "King")||
+							(cmd.move().from().row() == 7 && cmd.move().from().column() == 4 && cmd.move().to().row() == 7 && cmd.move().to().column() == 6 && game->board[cmd.move().from().row()][cmd.move().from().column()].figurine == "King") ||
+							(cmd.move().from().row() == 0 && cmd.move().from().column() == 4 && cmd.move().to().row() == 0 && cmd.move().to().column() == 2 && game->board[cmd.move().from().row()][cmd.move().from().column()].figurine == "King") ||
+							(cmd.move().from().row() == 0 && cmd.move().from().column() == 4 && cmd.move().to().row() == 0 && cmd.move().to().column() == 6 && game->board[cmd.move().from().row()][cmd.move().from().column()].figurine == "King"))
+						{
+							game->castling = true;
+						}
 					}
 				}
 				game->dispatcher();
@@ -143,7 +150,7 @@ void RoomWindow::add_button_clicked(){
 	if (status.ok())
 	{
 		Room tmp = resp.room();
-		room_dic.insert(pair<int, string >(tmp.roomid(), tmp.name().c_str()));
+		room_dic.insert(pair<int, string>(tmp.roomid(), tmp.name().c_str()));
 		comboB.append(tmp.name().c_str());
 	}
 }
