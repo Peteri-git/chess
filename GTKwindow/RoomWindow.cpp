@@ -76,7 +76,7 @@ void RoomWindow::listen() {
 			req.set_allocated_room(join);
 		}
 	}
-	std::shared_ptr<grpc::ClientReader<GrpcGameService::GameCommandResponse>> status = client->Join(&ctx, req);
+	auto status = client->Join(&ctx, req);
 	GameCommandResponse cmd;
 	while (true)
 	{
@@ -90,7 +90,6 @@ void RoomWindow::listen() {
 
 
 				game->client = client;
-				game->status = status;
 				game->gameid = gameid;
 				game->color = GrpcGameService::Color_Name(color);
 
@@ -127,9 +126,9 @@ void RoomWindow::listen() {
 							}
 						}
 						if ((cmd.move().from().row() == 7 && cmd.move().from().column() == 4 && cmd.move().to().row() == 7 && cmd.move().to().column() == 2 &&game->board[cmd.move().from().row()][cmd.move().from().column()].figurine == "King")||
-							(cmd.move().from().row() == 7 && cmd.move().from().column() == 4 && cmd.move().to().row() == 7 && cmd.move().to().column() == 6 && game->board[cmd.move().from().row()][cmd.move().from().column()].figurine == "King") ||
-							(cmd.move().from().row() == 0 && cmd.move().from().column() == 4 && cmd.move().to().row() == 0 && cmd.move().to().column() == 2 && game->board[cmd.move().from().row()][cmd.move().from().column()].figurine == "King") ||
-							(cmd.move().from().row() == 0 && cmd.move().from().column() == 4 && cmd.move().to().row() == 0 && cmd.move().to().column() == 6 && game->board[cmd.move().from().row()][cmd.move().from().column()].figurine == "King"))
+						   (cmd.move().from().row() == 7 && cmd.move().from().column() == 4 && cmd.move().to().row() == 7 && cmd.move().to().column() == 6 && game->board[cmd.move().from().row()][cmd.move().from().column()].figurine == "King")||
+						   (cmd.move().from().row() == 0 && cmd.move().from().column() == 4 && cmd.move().to().row() == 0 && cmd.move().to().column() == 2 && game->board[cmd.move().from().row()][cmd.move().from().column()].figurine == "King")||
+						   (cmd.move().from().row() == 0 && cmd.move().from().column() == 4 && cmd.move().to().row() == 0 && cmd.move().to().column() == 6 && game->board[cmd.move().from().row()][cmd.move().from().column()].figurine == "King"))
 						{
 							game->castling = true;
 						}
@@ -152,6 +151,7 @@ void RoomWindow::add_button_clicked(){
 		Room tmp = resp.room();
 		room_dic.insert(pair<int, string>(tmp.roomid(), tmp.name().c_str()));
 		comboB.append(tmp.name().c_str());
+		textbox.set_text("");
 	}
 }
 void RoomWindow::join_button_clicked() {

@@ -30,7 +30,6 @@ public:
 	boardTile board[8][8];
 	std::string color;
 	std::string UpdateFigurine = "";
-	std::shared_ptr<grpc::ClientReader<GrpcGameService::GameCommandResponse>> status;
 	std::shared_ptr<GrpcGameService::RoomService::Stub> client;
 	std::basic_string<char, std::char_traits<char>, std::allocator<char>> gameid;
 	bool castling = false;

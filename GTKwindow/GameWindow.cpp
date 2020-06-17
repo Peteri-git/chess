@@ -16,6 +16,8 @@ GameWindow::GameWindow() :start_button("show board")
 	start_button.signal_clicked().connect(sigc::mem_fun(*this, &GameWindow::ShowBoard));
 	gridBox.attach(start_button, 0, 1, 1, 1);
 	gridBox.show_all();
+	gridBox.set_row_homogeneous(true);
+	gridBox.set_column_homogeneous(true);
 	dispatcher.connect(sigc::mem_fun(*this, &GameWindow::UpdateMoves));
 }
 GameWindow::~GameWindow()
