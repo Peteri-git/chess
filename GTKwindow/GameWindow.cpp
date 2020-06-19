@@ -32,15 +32,6 @@ void GameWindow::UpdateMoves()
 	int newX = lastMove.to().row();
 	int newY = lastMove.to().column();
 	string castleColor;
-	/*Glib::RefPtr<Gtk::CssProvider> css_white = Gtk::CssProvider::create();
-	css_white->load_from_data("button {background-image: image(white);}");
-	for (int i = 0; i < 8; i++)
-	{
-		for (int j = 0; j < 8; j++)
-		{
-			copy_board[i][j].button->get_style_context()->add_provider(css_white, GTK_STYLE_PROVIDER_PRIORITY_USER);
-		}
-	}*/
 	for (int i = 0; i < 8; i++)
 	{
 		for (int j = 0; j < 8; j++)
@@ -57,10 +48,9 @@ void GameWindow::UpdateMoves()
 	if (UpdateFigurine != "" && newX == 0)
 	{
 		gridBox.show_all();
-		string path; //= "D:\\GTKwindow\\Debug\\BLACK_Queen.png";
+		string path;
 		Image* figurine = new Image(path);
 		Image* emptyImage = new Image();
-		//boardTile endTile = board[newX][newY];
 		board[newX][newY].figurine = "Queen";
 		board[newX][newY].color = board[oldX][oldY].color;
 		board[newX][newY].button->set_image(*figurine);
@@ -74,10 +64,9 @@ void GameWindow::UpdateMoves()
 	else if (UpdateFigurine != "" && newX == 7)
 	{
 		gridBox.show_all();
-		string path; //= "D:\\GTKwindow\\Debug\\WHITE_Queen.png";
+		string path;
 		Image* figurine = new Image(path);
 		Image* emptyImage = new Image();
-		//boardTile endTile = board[newX][newY];
 		board[newX][newY].figurine = "Queen";
 		board[newX][newY].color = board[oldX][oldY].color;
 		board[newX][newY].button->set_image(*figurine);
@@ -91,7 +80,7 @@ void GameWindow::UpdateMoves()
 	else
 	{
 		gridBox.show_all();
-		string path;// = "D:\\GTKwindow\\Debug\\";
+		string path;
 		string fig = board[oldX][oldY].figurine;
 		string color = board[oldX][oldY].color;
 		castleColor = board[oldX][oldY].color;
@@ -101,11 +90,6 @@ void GameWindow::UpdateMoves()
 		path.append(".png");
 		Image* figurine = new Image(path);
 		Image* emptyImage = new Image();
-		/*boardTile* endTile = new boardTile();*/
-		/*endTile->button = board[newX][newY].button;
-		endTile->color = board[newX][newY].color;
-		endTile->figurine = board[newX][newY].figurine;
-		endTile->hasFunc = board[newX][newY].hasFunc;*/
 		board[newX][newY].figurine = board[oldX][oldY].figurine;
 		board[newX][newY].color = board[oldX][oldY].color;
 		board[newX][newY].beenMoved = board[oldX][oldY].beenMoved;
@@ -116,22 +100,6 @@ void GameWindow::UpdateMoves()
 		board[oldX][oldY].button->set_image(*emptyImage);
 		Turn();
 	}
-	//if (endTile->figurine != "King")
-	//{
-	//	Turn();
-	//}
-	//if (endTile->figurine == "King")
-	//{
-	//	string end = "The game was lost by ";
-	//	end.append(endTile.color);
-	//	msgBox->set_secondary_text(end);
-	//	msgBox->run();
-	//	//msgBox->signal_button_press_event().connect();
-	//}
-	//if (castling == false)
-	//{
-	//	
-	//}
 	if (castling == true)
 	{
 		string castlingPath;
@@ -245,7 +213,7 @@ void GameWindow::Turn()
 				if (board[i][j].color == "WHITE")
 				{
 					Button* tile = new Button();
-					string path;// = "D:\\GTKwindow\\Debug\\";
+					string path;
 					string fig = board[i][j].figurine;
 					string color = board[i][j].color;
 					path.append(color);
@@ -261,7 +229,7 @@ void GameWindow::Turn()
 				if (board[i][j].color == "BLACK")
 				{
 					Button* tile = new Button();
-					string path;// = "D:\\GTKwindow\\Debug\\";
+					string path;
 					string fig = board[i][j].figurine;
 					string color = board[i][j].color;
 					path.append(color);
@@ -288,7 +256,7 @@ void GameWindow::Turn()
 				if (board[i][j].color == "WHITE")
 				{
 					Button* tile = new Button();
-					string path; //= "D:\\GTKwindow\\Debug\\";
+					string path; 
 					string fig = board[i][j].figurine;
 					string color = board[i][j].color;
 					path.append(color);
@@ -305,7 +273,7 @@ void GameWindow::Turn()
 				if (board[i][j].color == "BLACK")
 				{
 					Button* tile = new Button();
-					string path;// = "D:\\GTKwindow\\Debug\\";
+					string path;
 					string fig = board[i][j].figurine;
 					string color = board[i][j].color;
 					path.append(color);
@@ -328,7 +296,6 @@ void GameWindow::SendMoves(int oldX,int oldY,int newX,int newY, string figurine)
 {
 	if (castling != true)
 	{
-		//click_count = 0;
 		ClientContext ctx;
 		GameMoveRequest req;
 		Position* from = new Position();
@@ -370,7 +337,7 @@ void GameWindow::SendMoves(int oldX,int oldY,int newX,int newY, string figurine)
 							Button* tile = new Button();
 							if (board[i][j].figurine != "None")
 							{
-								string path;// = "D:\\GTKwindow\\Debug\\";
+								string path;
 								string fig = board[i][j].figurine;
 								string color = board[i][j].color;
 								path.append(color);
@@ -399,7 +366,7 @@ void GameWindow::SendMoves(int oldX,int oldY,int newX,int newY, string figurine)
 				if (newX == 0 && figurine == "Pawn")
 				{
 					gridBox.show_all();
-					string path; //= "D:\\GTKwindow\\Debug\\BLACK_Queen.png";
+					string path;
 					Image* figurine = new Image(path);
 					Image* emptyImage = new Image();
 					auto endTile = board[newX][newY];
@@ -415,7 +382,7 @@ void GameWindow::SendMoves(int oldX,int oldY,int newX,int newY, string figurine)
 				else if (newX == 7 && figurine == "Pawn")
 				{
 					gridBox.show_all();
-					string path; //= "D:\\GTKwindow\\Debug\\WHITE_Queen.png";
+					string path;
 
 					Image* figurine = new Image(path);
 					Image* emptyImage = new Image();
@@ -432,7 +399,7 @@ void GameWindow::SendMoves(int oldX,int oldY,int newX,int newY, string figurine)
 				else
 				{
 					gridBox.show_all();
-					string path;// = "D:\\GTKwindow\\Debug\\";
+					string path;
 					string fig = board[oldX][oldY].figurine;
 					string color = board[oldX][oldY].color;
 					path.append(color);
@@ -441,7 +408,6 @@ void GameWindow::SendMoves(int oldX,int oldY,int newX,int newY, string figurine)
 					path.append(".png");
 					Image* figurine = new Image(path);
 					Image* emptyImage = new Image();
-					//auto endTile = board[newX][newY];
 					board[newX][newY].figurine = board[oldX][oldY].figurine;
 					board[newX][newY].color = board[oldX][oldY].color;
 					board[newX][newY].beenMoved = board[oldX][oldY].beenMoved;
@@ -456,22 +422,6 @@ void GameWindow::SendMoves(int oldX,int oldY,int newX,int newY, string figurine)
 						board[newX][newY].beenMoved = true;
 					}
 				}
-
-
-				//if (endTile.figurine != "King")
-				//{
-				//	Turn();
-				//}
-				//if (endTile.figurine == "King")
-				//{
-				//	string end = "The game was lost by ";
-				//	end.append(endTile.color);
-				//	MessageDialog* msgBox = new MessageDialog("The game ended!");
-				//	msgBox->set_secondary_text(end);
-				//	msgBox->run();
-				//	//msgBox->signal_button_press_event().connect();
-
-				//}
 			}
 			click_count = 0;
 			}
@@ -479,7 +429,6 @@ void GameWindow::SendMoves(int oldX,int oldY,int newX,int newY, string figurine)
 	}
 	if (castling == true)
 	{	
-		//click_count = 0;
 		ClientContext ctx;
 		GameMoveRequest req;
 		Position* from = new Position();
@@ -515,7 +464,7 @@ void GameWindow::SendMoves(int oldX,int oldY,int newX,int newY, string figurine)
 						Button* tile = new Button();
 						if (board[i][j].figurine != "None")
 						{
-							string path;//= "D:\\GTKwindow\\Debug\\";
+							string path;
 							string fig = board[i][j].figurine;
 							string color = board[i][j].color;
 							path.append(color);
@@ -542,8 +491,8 @@ void GameWindow::SendMoves(int oldX,int oldY,int newX,int newY, string figurine)
 				}
 			}
 			gridBox.show_all();
-			string castlingPath;// = "D:\\GTKwindow\\Debug\\";
-			string path;//= "D:\\GTKwindow\\Debug\\";
+			string castlingPath;
+			string path;
 			string fig = board[oldX][oldY].figurine;
 			string color = board[oldX][oldY].color;
 			path.append(color);
@@ -667,7 +616,6 @@ void GameWindow::SendMoves(int oldX,int oldY,int newX,int newY, string figurine)
 }
 void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 {
-	//click_count++;
 	Glib::RefPtr<Gtk::CssProvider> css_red = Gtk::CssProvider::create();
 	Glib::RefPtr<Gtk::CssProvider> css_green = Gtk::CssProvider::create();
 	Glib::RefPtr<Gtk::CssProvider> css_white = Gtk::CssProvider::create();
@@ -692,7 +640,7 @@ void GameWindow::ShowMoves(string figurine, string color,int x,int y)
 					Button* tile = new Button();
 					if (board[i][j].figurine != "None")
 					{
-						string path;// = "D:\\GTKwindow\\Debug\\";
+						string path;
 						string fig = board[i][j].figurine;
 						string color = board[i][j].color;
 						path.append(color);

@@ -37,16 +37,13 @@ public:
 protected:
 	void ShowBoard();
 	void UpdateMoves();
-	boardTile copy_board[8][8];
 	void Turn();
 	void SendMoves(int oldX, int oldY, int newX, int newY, std::string figurine);
 	void ShowMoves(std::string figurine, std::string color,int x, int y);
 	int turn = 0;
 	int click_count = 0;
 	Gtk::Grid gridBox;
-	Gtk::MessageDialog* msgBox = new Gtk::MessageDialog("The game ended!");
 	Gtk::Button start_button;
-	Gtk::Image king;
 };
 
 
