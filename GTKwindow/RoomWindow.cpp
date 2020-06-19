@@ -78,40 +78,46 @@ void RoomWindow::listen() {
 	}
 	auto status = client->Join(&ctx, req);
 	GameCommandResponse cmd;
-	while (true)
+	string victoryColor;
+	while (status->Read(&cmd))
 	{
-		while (status->Read(&cmd))
+		if (cmd.has_start())
 		{
-			if (cmd.has_start())
+			auto color = cmd.start().color();
+			auto board = cmd.start().state().tiles();
+			auto gameid = cmd.start().gameid();
+
+
+			game->client = client;
+			game->gameid = gameid;
+			game->color = GrpcGameService::Color_Name(color);
+
+			for (auto const& item : board) {
+				boardTile fgt;
+				fgt.color = GrpcGameService::Color_Name(item.figurinecolor());
+				fgt.figurine = GrpcGameService::Figurine_Name(item.figurine());
+				game->board[item.position().row()][item.position().column()] = fgt;
+			}
+			for (int i = 2; i < 6; i++)
 			{
-				auto color = cmd.start().color();
-				auto board = cmd.start().state().tiles();
-				auto gameid = cmd.start().gameid();
-
-
-				game->client = client;
-				game->gameid = gameid;
-				game->color = GrpcGameService::Color_Name(color);
-
-				for (auto const& item : board) {
-					boardTile fgt;
-					fgt.color = GrpcGameService::Color_Name(item.figurinecolor());
-					fgt.figurine = GrpcGameService::Figurine_Name(item.figurine());
-					game->board[item.position().row()][item.position().column()] = fgt;
-				}
-				for (int i = 2; i < 6; i++)
+				for (int j = 0; j < 8; j++)
 				{
-					for (int j = 0; j < 8; j++)
-					{
-						boardTile fgt;
-						fgt.color = "NONE";
-						fgt.figurine = "None";
-						fgt.hasFunc = false;
-						game->board[i][j] = fgt;
-					}
+					boardTile fgt;
+					fgt.color = "NONE";
+					fgt.figurine = "None";
+					fgt.hasFunc = false;
+					game->board[i][j] = fgt;
 				}
 			}
-			if (cmd.has_move())
+		}
+		if (cmd.has_move())
+		{
+			if (game->board[cmd.move().to().row()][cmd.move().to().column()].figurine == "King")
+			{
+				break;
+				//victoryColor = game->board[cmd.move().from().row()][cmd.move().from().column()].color;
+			}
+			else
 			{
 				game->lastMove = cmd.move();
 				for (int i = 0; i < 8; i++)
@@ -125,10 +131,10 @@ void RoomWindow::listen() {
 								game->UpdateFigurine = "Queen";
 							}
 						}
-						if ((cmd.move().from().row() == 7 && cmd.move().from().column() == 4 && cmd.move().to().row() == 7 && cmd.move().to().column() == 2 &&game->board[cmd.move().from().row()][cmd.move().from().column()].figurine == "King")||
-						   (cmd.move().from().row() == 7 && cmd.move().from().column() == 4 && cmd.move().to().row() == 7 && cmd.move().to().column() == 6 && game->board[cmd.move().from().row()][cmd.move().from().column()].figurine == "King")||
-						   (cmd.move().from().row() == 0 && cmd.move().from().column() == 4 && cmd.move().to().row() == 0 && cmd.move().to().column() == 2 && game->board[cmd.move().from().row()][cmd.move().from().column()].figurine == "King")||
-						   (cmd.move().from().row() == 0 && cmd.move().from().column() == 4 && cmd.move().to().row() == 0 && cmd.move().to().column() == 6 && game->board[cmd.move().from().row()][cmd.move().from().column()].figurine == "King"))
+						if ((cmd.move().from().row() == 7 && cmd.move().from().column() == 4 && cmd.move().to().row() == 7 && cmd.move().to().column() == 2 && game->board[cmd.move().from().row()][cmd.move().from().column()].figurine == "King") ||
+							(cmd.move().from().row() == 7 && cmd.move().from().column() == 4 && cmd.move().to().row() == 7 && cmd.move().to().column() == 6 && game->board[cmd.move().from().row()][cmd.move().from().column()].figurine == "King") ||
+							(cmd.move().from().row() == 0 && cmd.move().from().column() == 4 && cmd.move().to().row() == 0 && cmd.move().to().column() == 2 && game->board[cmd.move().from().row()][cmd.move().from().column()].figurine == "King") ||
+							(cmd.move().from().row() == 0 && cmd.move().from().column() == 4 && cmd.move().to().row() == 0 && cmd.move().to().column() == 6 && game->board[cmd.move().from().row()][cmd.move().from().column()].figurine == "King"))
 						{
 							game->castling = true;
 						}
@@ -138,6 +144,9 @@ void RoomWindow::listen() {
 			}
 		}
 	}
+	game->close();
+	/*victoryColor.append(" won!");
+	set_title(victoryColor);*/
 }
 void RoomWindow::add_button_clicked(){
 	ClientContext ctx;

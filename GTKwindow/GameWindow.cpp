@@ -25,6 +25,8 @@ GameWindow::~GameWindow()
 }
 void GameWindow::UpdateMoves()
 {
+	GrpcGameService::GameEnd* end = new GameEnd();
+	
 	int oldX = lastMove.from().row();
 	int oldY = lastMove.from().column();
 	int newX = lastMove.to().row();
@@ -344,128 +346,136 @@ void GameWindow::SendMoves(int oldX,int oldY,int newX,int newY, string figurine)
 		auto status = client->Move(&ctx, req, &res);
 		if (status.ok())
 		{
-			Glib::RefPtr<Gtk::CssProvider> css_white = Gtk::CssProvider::create();
-			css_white->load_from_data("button {background-image: image(white);}");
-			for (int i = 0; i < 8; i++)
+			if (board[To->row()][To->column()].figurine == "King")
 			{
-				for (int j = 0; j < 8; j++)
-				{
-					board[i][j].button->get_style_context()->add_provider(css_white, GTK_STYLE_PROVIDER_PRIORITY_USER);
-				}
-			}
-			for (int i = 0; i < 8; i++)
-			{
-				for (int j = 0; j < 8; j++)
-				{
-					if (board[i][j].hasFunc == true)
-					{
-						Button* tile = new Button();
-						if (board[i][j].figurine != "None")
-						{
-							string path;// = "D:\\GTKwindow\\Debug\\";
-							string fig = board[i][j].figurine;
-							string color = board[i][j].color;
-							path.append(color);
-							path.append("_");
-							path.append(fig);
-							path.append(".png");
-							Image* figurine = new Image(path);
-							tile->set_image(*figurine);
-							tile->signal_clicked().connect(sigc::bind<string, string, int, int>(sigc::mem_fun(*this, &GameWindow::ShowMoves), fig, color, i, j));
-						}
-						gridBox.remove(*board[i][j].button);
-						board[i][j].button = tile;
-						gridBox.attach(*tile, j, i, 1, 1);
-
-						board[i][j].hasFunc = false;
-					}
-					if (i == oldX && j == oldY)
-					{
-						Button* tile = new Button();
-						gridBox.remove(*board[i][j].button);
-						board[i][j].button = tile;
-						gridBox.attach(*tile, j, i, 1, 1);
-					}
-				}
-			}
-			if (newX == 0 && figurine == "Pawn")
-			{
-				gridBox.show_all();
-				string path; //= "D:\\GTKwindow\\Debug\\BLACK_Queen.png";
-				Image* figurine = new Image(path);
-				Image* emptyImage = new Image();
-				auto endTile = board[newX][newY];
-				board[newX][newY].figurine = "Queen";
-				board[newX][newY].color = board[oldX][oldY].color;
-				board[newX][newY].button->set_image(*figurine);
-				board[newX][newY].button->signal_clicked().connect(sigc::bind<string, string, int, int>(sigc::mem_fun(*this, &GameWindow::ShowMoves), board[newX][newY].figurine, board[newX][newY].color, newX, newY));
-				board[oldX][oldY].figurine = "None";
-				board[oldX][oldY].color = "NONE";
-				board[oldX][oldY].button->set_image(*emptyImage);
-				Turn();
-			}
-			else if (newX == 7 && figurine == "Pawn")
-			{
-				gridBox.show_all();
-				string path; //= "D:\\GTKwindow\\Debug\\WHITE_Queen.png";
-
-				Image* figurine = new Image(path);
-				Image* emptyImage = new Image();
-				auto endTile = board[newX][newY];
-				board[newX][newY].figurine = "Queen";
-				board[newX][newY].color = board[oldX][oldY].color;
-				board[newX][newY].button->set_image(*figurine);
-				board[newX][newY].button->signal_clicked().connect(sigc::bind<string, string, int, int>(sigc::mem_fun(*this, &GameWindow::ShowMoves), board[newX][newY].figurine, board[newX][newY].color, newX, newY));
-				board[oldX][oldY].figurine = "None";
-				board[oldX][oldY].color = "NONE";
-				board[oldX][oldY].button->set_image(*emptyImage);
-				Turn();
+				close();
 			}
 			else
 			{
-				gridBox.show_all();
-				string path;// = "D:\\GTKwindow\\Debug\\";
-				string fig = board[oldX][oldY].figurine;
-				string color = board[oldX][oldY].color;
-				path.append(color);
-				path.append("_");
-				path.append(fig);
-				path.append(".png");
-				Image* figurine = new Image(path);
-				Image* emptyImage = new Image();
-				//auto endTile = board[newX][newY];
-				board[newX][newY].figurine = board[oldX][oldY].figurine;
-				board[newX][newY].color = board[oldX][oldY].color;
-				board[newX][newY].beenMoved = board[oldX][oldY].beenMoved;
-				board[newX][newY].button->set_image(*figurine);
-				board[newX][newY].button->signal_clicked().connect(sigc::bind<string, string, int, int>(sigc::mem_fun(*this, &GameWindow::ShowMoves), board[newX][newY].figurine, board[newX][newY].color, newX, newY));
-				board[oldX][oldY].figurine = "None";
-				board[oldX][oldY].color = "NONE";
-				board[oldX][oldY].button->set_image(*emptyImage);
-				Turn();
-				if (board[newX][newY].figurine == "King" || board[newX][newY].figurine == "Rook")
+				Glib::RefPtr<Gtk::CssProvider> css_white = Gtk::CssProvider::create();
+				css_white->load_from_data("button {background-image: image(white);}");
+				for (int i = 0; i < 8; i++)
 				{
-					board[newX][newY].beenMoved = true;
+					for (int j = 0; j < 8; j++)
+					{
+						board[i][j].button->get_style_context()->add_provider(css_white, GTK_STYLE_PROVIDER_PRIORITY_USER);
+					}
 				}
+				for (int i = 0; i < 8; i++)
+				{
+					for (int j = 0; j < 8; j++)
+					{
+						if (board[i][j].hasFunc == true)
+						{
+							Button* tile = new Button();
+							if (board[i][j].figurine != "None")
+							{
+								string path;// = "D:\\GTKwindow\\Debug\\";
+								string fig = board[i][j].figurine;
+								string color = board[i][j].color;
+								path.append(color);
+								path.append("_");
+								path.append(fig);
+								path.append(".png");
+								Image* figurine = new Image(path);
+								tile->set_image(*figurine);
+								tile->signal_clicked().connect(sigc::bind<string, string, int, int>(sigc::mem_fun(*this, &GameWindow::ShowMoves), fig, color, i, j));
+							}
+							gridBox.remove(*board[i][j].button);
+							board[i][j].button = tile;
+							gridBox.attach(*tile, j, i, 1, 1);
+
+							board[i][j].hasFunc = false;
+						}
+						if (i == oldX && j == oldY)
+						{
+							Button* tile = new Button();
+							gridBox.remove(*board[i][j].button);
+							board[i][j].button = tile;
+							gridBox.attach(*tile, j, i, 1, 1);
+						}
+					}
+				}
+				if (newX == 0 && figurine == "Pawn")
+				{
+					gridBox.show_all();
+					string path; //= "D:\\GTKwindow\\Debug\\BLACK_Queen.png";
+					Image* figurine = new Image(path);
+					Image* emptyImage = new Image();
+					auto endTile = board[newX][newY];
+					board[newX][newY].figurine = "Queen";
+					board[newX][newY].color = board[oldX][oldY].color;
+					board[newX][newY].button->set_image(*figurine);
+					board[newX][newY].button->signal_clicked().connect(sigc::bind<string, string, int, int>(sigc::mem_fun(*this, &GameWindow::ShowMoves), board[newX][newY].figurine, board[newX][newY].color, newX, newY));
+					board[oldX][oldY].figurine = "None";
+					board[oldX][oldY].color = "NONE";
+					board[oldX][oldY].button->set_image(*emptyImage);
+					Turn();
+				}
+				else if (newX == 7 && figurine == "Pawn")
+				{
+					gridBox.show_all();
+					string path; //= "D:\\GTKwindow\\Debug\\WHITE_Queen.png";
+
+					Image* figurine = new Image(path);
+					Image* emptyImage = new Image();
+					auto endTile = board[newX][newY];
+					board[newX][newY].figurine = "Queen";
+					board[newX][newY].color = board[oldX][oldY].color;
+					board[newX][newY].button->set_image(*figurine);
+					board[newX][newY].button->signal_clicked().connect(sigc::bind<string, string, int, int>(sigc::mem_fun(*this, &GameWindow::ShowMoves), board[newX][newY].figurine, board[newX][newY].color, newX, newY));
+					board[oldX][oldY].figurine = "None";
+					board[oldX][oldY].color = "NONE";
+					board[oldX][oldY].button->set_image(*emptyImage);
+					Turn();
+				}
+				else
+				{
+					gridBox.show_all();
+					string path;// = "D:\\GTKwindow\\Debug\\";
+					string fig = board[oldX][oldY].figurine;
+					string color = board[oldX][oldY].color;
+					path.append(color);
+					path.append("_");
+					path.append(fig);
+					path.append(".png");
+					Image* figurine = new Image(path);
+					Image* emptyImage = new Image();
+					//auto endTile = board[newX][newY];
+					board[newX][newY].figurine = board[oldX][oldY].figurine;
+					board[newX][newY].color = board[oldX][oldY].color;
+					board[newX][newY].beenMoved = board[oldX][oldY].beenMoved;
+					board[newX][newY].button->set_image(*figurine);
+					board[newX][newY].button->signal_clicked().connect(sigc::bind<string, string, int, int>(sigc::mem_fun(*this, &GameWindow::ShowMoves), board[newX][newY].figurine, board[newX][newY].color, newX, newY));
+					board[oldX][oldY].figurine = "None";
+					board[oldX][oldY].color = "NONE";
+					board[oldX][oldY].button->set_image(*emptyImage);
+					Turn();
+					if (board[newX][newY].figurine == "King" || board[newX][newY].figurine == "Rook")
+					{
+						board[newX][newY].beenMoved = true;
+					}
+				}
+
+
+				//if (endTile.figurine != "King")
+				//{
+				//	Turn();
+				//}
+				//if (endTile.figurine == "King")
+				//{
+				//	string end = "The game was lost by ";
+				//	end.append(endTile.color);
+				//	MessageDialog* msgBox = new MessageDialog("The game ended!");
+				//	msgBox->set_secondary_text(end);
+				//	msgBox->run();
+				//	//msgBox->signal_button_press_event().connect();
+
+				//}
 			}
-
-
-			//if (endTile.figurine != "King")
-			//{
-			//	Turn();
-			//}
-			//if (endTile.figurine == "King")
-			//{
-			//	string end = "The game was lost by ";
-			//	end.append(endTile.color);
-			//	MessageDialog* msgBox = new MessageDialog("The game ended!");
-			//	msgBox->set_secondary_text(end);
-			//	msgBox->run();
-			//	//msgBox->signal_button_press_event().connect();
-
-			//}
-		}
-		click_count = 0;
+			click_count = 0;
+			}
+			
 	}
 	if (castling == true)
 	{	
